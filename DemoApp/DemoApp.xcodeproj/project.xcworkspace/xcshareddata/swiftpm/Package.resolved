@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "ios-test-publish",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/thienNH0/iOS-test-publish",
+      "state" : {
+        "revision" : "84da40effd9d7b24b7b0ce6d029eb94b0bd77d5d",
+        "version" : "1.0.1"
+      }
+    }
+  ],
+  "version" : 2
+}
