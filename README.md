@@ -1,176 +1,180 @@
 # Mavis ID iOS SDK
 
-iOS SDK use to interact with Mavis ID, use to develop in app Web3 wallet
+The Mavis ID iOS SDK lets developers integrate Mavis ID into mobile apps developed for the iOS platform. After the integration, users can sign in to your app with Mavis ID and create an embedded Web3 wallet to interact with the blockchain to send and receive tokens, sign messages, and more.
 
 ## Features
 
-- [x] Authorize
-- [x] Sign message
-- [x] Sign typed data
-- [x] Send transaction
-- [x] Call contract
+* Authorize users: sign in to your app with Mavis ID.
+* Send transactions: transfer tokens to other addresses.
+* Sign messages: sign plain text messages.
+* Sign typed data: sign structured data according to the EIP-712 standard.
+* Call contracts: execute custom transactions on smart contracts.
 
 ## Prerequisites
 
-- `iOS` : >= `13.0`
-- Register your application with Sky Mavis to get `YOUR_APP_ID` and `YOUR_REDIRECT_URI`
-- Request permission to use Mavis ID
-- Go to Developer Console > your app > App Permission > Mavis ID > Request Access
+* [iOS 13.0](https://developer.apple.com/ios/) or later and [Xcode](https://developer.apple.com/xcode/).
+* An app created in the [Developer Console](https://developers.skymavis.com/console/applications/).
+* Permission to use Mavis ID. Request in **Developer Console > your app > App Permission > Sky Mavis Account (OAuth 2.0) > Request Access**.
+* A client ID that you can find in **Developer Console > Products > ID Service > CLIENT ID (APPLICATION ID)**.
+* A redirect URI registered in **Developer Console > Products > ID Service > REDIRECT URI**.
 
-[Go to developer portal](https://developers.skymavis.com/) to acquired `YOUR_APP_ID` and `YOUR_REDIRECT_URI`
+For more information about the initial setup, see [Get started](https://docs.skymavis.com/mavis/mavis-id/guides/get-started).
 
 ## Installation
 
-In `Xcode` -> `Target`-> `Add Package Dependency` -> Add package with Github url `https://github.com/skymavis/mavis-id-iOS`
+In Xcode, select your target, then go to **General > + > Add Other > Add Package Dependency**, and then enter this repository URL: `https://github.com/skymavis/mavis-id-iOS`.
 
 ## Initialization
 
-Initial SDK `Client`
-
-- `address` : The URL of Mavis ID. This is the base URL for all API calls.
-- `clientId`: The client ID registered in Mavis ID. This is used to identify your application.
-- `chainRpc` : Rpc URL of Ronin chain. In this example it's set for the `Ronin Testnet`.
-- `chainId`: The ID of the blockchain network. In this example, it's set to `2021` for the `Ronin Testnet`.
+Initialize the client:
 
 ```swift
 import id
 
 let id = Client(
-    // The url of Mavis ID
+    // Base URL of Mavis ID
     address: "https://id.skymavis.com",
-    // The client ID registered in Mavis ID
+    // Client ID from the Mavis ID settings in the Developer Console
     clientId: "{YOUR_CLIENT_ID}",
-    // Ronin Testnet
+    // Saigon testnet parameters
     chainRpc: "https://saigon-testnet.roninchain.com/rpc",
     chainId: 2021
 )
 ```
 
-### Usage
+Parameters:
 
-- All function of SDK will return a `string` in format the deeplink which registered schema with `Mavis ID`
-- Developer can parse string with `Utils` in SDK or manual.
+* `address`: the URL of Mavis ID, serving as the base URL for all API calls.
+* `clientId`: the client ID registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
+* `chainRpc`: the RPC endpoint through which you want to connect to Ronin: `https://saigon-testnet.roninchain.com/rpc` is a public endpoint for the Saigon testnet. For other endpoints, see [RPC endpoints](https://docs.skymavis.com/ronin/rpc/overview#rpc-endpoints).
+* `chainId`: the ID of the Ronin chain you want to connect to: `2021` for the Saigon testnet and `2020` for the Ronin mainnet.
 
-#### Authorize
+## Usage
 
-- This function authorizes a user with an existing Mavis ID account. If the user does not have an account, they will be prompted to create one.
+* All functions of the SDK return a `string` in the format of the deeplink schema that you registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
+* You can parse strings using the `parseDeepLink` utility function or do it manually. For more information, see [Utilities](#utilities).
+
+### Authorize users
+
+Authorizes a user with an existing Mavis ID account, returning an ID token and the user's wallet address. If the user does not have an account, they will be prompted to create one.
 
 ```swift
-func authorize(from viewController: UIViewController, state : String, redirect: String) async -> String
-
+func authorize(from viewController: UIViewController, state: String, redirect: String) async -> String
 ```
 
-##### Params :
+Parameters:
 
-- `from` : The `UIViewController` of your app.
-- `state`: Random UUID use to be request id.
-- `redirect` : Redirect uri registed with `Mavis ID`.
+* `from`: the `UIViewController` of your app.
+* `state`: a unique random identifier used to manage requests from the client to Mavis ID.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 
-##### Example
+Example:
 
 ```swift
-
- // Implement the action for the Authorize
+// Implement the action for authorization
 @objc func authorizeTapped() -> Void {
-    // Use Utils of SDK to generate random state
+    // Use the SDK utility to generate a random state
     let state = Utils.generateRandomState()
-    // Example : "mydapp://callback"
+    // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
         let result = await id.authorize(from: self, state: state, redirect: redirect)
-        // Optional to use Utils of SDK
+        // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
     }
 }
 ```
 
-#### Send transaction
+### Send transactions
+
+Transfers RON tokens to a recipient's address, returning a transaction hash.
 
 ```swift
-func sendTransaction(from viewController: UIViewController, state : String, redirect: String, to: String, value: String) async -> String
+func sendTransaction(from viewController: UIViewController, state: String, redirect: String, to: String, value: String) async -> String
 ```
 
-#### Params :
+Parameters:
 
-- `from` : The `UIViewController` of your app.
-- `state`: Random UUID use to be request id.
-- `redirect` : Redirect uri registed with `Mavis ID`.
-- `to` : Receiver address
-- `value` : Amount want to send in `Wei`
+* `from`: the `UIViewController` of your app.
+* `state`: a unique random identifier used to manage requests from the client to Mavis ID.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
+* `to`: the recipient's address.
+* `value`: the amount of RON to send, specified in wei (1 RON = 10^18 wei).
 
-#### Example
+Example:
 
 ```swift
 @objc func sendTransactionTapped() -> Void {
-    // Use Utils of SDK to generate random state
+    // Use the SDK utility to generate a random state
     let state = Utils.generateRandomState()
     // Receiver address
     let to = "${YOUR_RECEIVER_ADDRESS}"
-    // 1 Ron in Wei
+    // 1 RON in wei
     let value = "100000000000000000"
-    // Example : "mydapp://callback"
+    // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
         let result = await id.sendTransaction(from: self, state: state, redirect: redirect, to: to, value: value)
-        // Optional to use Utils of SDK to parse result
+        // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
     }
 }
 ```
 
-#### Personal sign
+### Sign messages
+
+Sign a plain text message, returning a signature in hex format.
 
 ```swift
-public func personalsign(from viewcontroller: uiviewcontroller, state : string, redirect: string, message: string) async -> string
+public func personalsign(from viewcontroller: uiviewcontroller, state: string, redirect: string, message: string) async -> string
 ```
 
-##### Param :
+Parameters:
 
-- `from` : The `UIViewController` of your app.
-- `state`: Random UUID use to be request id.
-- `redirect` : Redirect uri registed with `Mavis ID`.
-- `message` : Message to sign.
+* `from`: the `UIViewController` of your app.
+* `state`: a unique random identifier used to manage requests from the client to Mavis ID.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
+* `message`: the message to sign.
 
-##### Example
+Example:
 
 ```swift
 @objc func personalSignTapped() -> Void {
-    // Use Utils of SDK to generate random state
+    // Use the SDK utility to generate a random state
     let state = Utils.generateRandomState()
     // Message to sign
     var message = "Hello Axie"
-    // Example : "mydapp://callback"
+    // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
         let result = await id.personalSign(from: self, state: state, redirect: redirect, message: message)
-        // Optional to use Utils of SDK to parse result
+        // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
 
     }
 }
 ```
 
-#### Sign Typed Data
+### Sign typed data
 
-- Signs the typed data value with types data structure for domain using the EIP-712 specification.
-- Sign typed data of an Axie
+Signs data structured according to the [EIP-712](https://eips.ethereum.org/EIPS/eip-712) standard, returning a signature in hex format. Also signs typed data of an axie.
 
 ```swift
-func signTypeData(from viewController: UIViewController, state : String, redirect: String, typedData: String) async -> String
+func signTypeData(from viewController: UIViewController, state: String, redirect: String, typedData: String) async -> String
 ```
 
-##### Param :
+Parameters:
 
-- `from` : The `UIViewController` of your app.
-- `state`: Random UUID use to be request id.
-- `redirect` : Redirect uri registed with `Mavis ID`.
-- `typedData` : Types data structure for domain using the EIP-712 specification.
+* `from`: the `UIViewController` of your app.
+* `state`: a unique random identifier used to manage requests from the client to Mavis ID.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications/).
+* `typedData`: typed data structured using EIP-712.
 
-##### Example
+Example:
 
 ```swift
 @objc func signTypeDataTapped() -> Void {
-    // Example of type data use EIP-721 specification.
+    // Example of type data using the EIP-712 standard.
     let typedData = """
     {
         "types": {
@@ -231,32 +235,36 @@ func signTypeData(from viewController: UIViewController, state : String, redirec
         }
     }
     """
-    // Use Utils of SDK to generate random state
+    // Use the SDK utility to generate a random state
     let state = Utils.generateRandomState()
-    // Example : "mydapp://callback"
+    // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
         let result = await id.signTypeData(from: self, state: state, redirect: redirect, typedData: typedData)
-        // Optional to use Utils of SDK to parse result
+        // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
     }
     }
 ```
 
-#### Call contract
+### Call contracts
+
+Executes a custom transaction on a specified smart contract, returning a transaction hash.
 
 ```swift
-func callContract(from viewController: UIViewController, state : String, redirect: String, contractAddress: String, data: String, value : String? = nil) async -> String
+func callContract(from viewController: UIViewController, state: String, redirect: String, contractAddress: String, data: String, value: String? = nil) async -> String
 ```
 
-##### Param :
+Parameters:
 
-- `from` : The `UIViewController` of your app.
-- `state`: Random UUID use to be request id.
-- `redirect` : Redirect uri registed with `Mavis ID`.
-- `contractAddress` : Smart contract address to interact with.
-- `data` : Encoded transaction data.
-- `value` (Optional) : Value in `Wei`.
+* `from`: the `UIViewController` of your app.
+* `state`: a unique random identifier used to manage requests from the client to Mavis ID.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications/).
+* `contractAddress`: the address of the smart contract to interact with.
+* `data`: encoded transaction data.
+* `value`: optionally, the value in wei.
+
+Example:
 
 ```swift
 @objc func callContractTapped() -> Void {
@@ -264,37 +272,37 @@ func callContract(from viewController: UIViewController, state : String, redirec
     let contractAddress = "0x3c4e17b9056272ce1b49f6900d8cfd6171a1869d"
     // Approve 1 RON
     let data = "0xa9059cbb000000000000000000000000edb40e7abaa613a0b06d86260dd55c7eb2df2447000000000000000000000000000000000000000000000000016345785d8a0000"
-    // Use Utils of SDK to generate random state
+    // Use the SDK utility to generate a random state
     let state = Utils.generateRandomState()
     Task {
         let result = await id.callContract(from: self, state: state, redirect: redirect, contractAddress: contractAddress, data: data)
-        // Optional to use Utils of SDK to parse result
+        // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
     }
 }
 ```
 
-#### Utils
+## Utilities
 
-#### Generate random state
+### Generate random state
 
-- Use to generate random UUID
-
-```swift
-    static func generateRandomState() -> String
-```
-
-#### Parse deeplink
-
-- Use to parse deeplink, result from function and assign it to `Response` object.
+Use to generate a random UUID.
 
 ```swift
- static func parseDeepLink(deeplink : String) -> Response
+static func generateRandomState() -> String
 ```
 
-#### Reponse
+### Parse deeplinks
 
-- A setter, getter class to save result from `Mavis ID`
+Use to parse a deeplink returned by a function, and assign it to a `Response` object.
+
+```swift
+static func parseDeepLink(deeplink: String) -> Response
+```
+
+### Response
+
+A setter, getter class to save the result from Mavis ID.
 
 ```swift
 public class Response {
@@ -305,3 +313,7 @@ public class Response {
     private var state: String?
 }
 ```
+
+## See also
+
+For more information about Mavis ID, see the [official documentation](https://docs.skymavis.com/mavis/mavis-id/overview).
