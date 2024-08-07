@@ -45,9 +45,9 @@ let id = Client(
 Parameters:
 
 * `address`: the URL of Mavis ID. This is the base URL for all API calls.
-* `clientId`: the client ID registered in Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications). This is used to identify your app.
+* `clientId`: the client ID registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 * `chainRpc`: Ronin's RPC URL. In this example, the Saigon testnet. For more information, see [RPC endpoints](https://docs.skymavis.com/ronin/rpc/overview#rpc-endpoints).
-* `chainId`: the ID of the blockchain network. In this example, it's set to `2021` for the Saigon testnet. For the Ronin mainnet, use `2020`.
+* `chainId`: the ID of the blockchain network. In this example, `2021` for the Saigon testnet. For the Ronin mainnet, use `2020`.
 
 ## Usage
 
