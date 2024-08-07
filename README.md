@@ -15,8 +15,8 @@ The Mavis ID iOS SDK lets developers integrate Mavis ID into mobile apps develop
 * [iOS 13.0](https://developer.apple.com/ios/) or later and [Xcode](https://developer.apple.com/xcode/).
 * An app created in the [Developer Console](https://developers.skymavis.com/console/applications/).
 * Permission to use Mavis ID. Request in **Developer Console > your app > App Permission > Sky Mavis Account (OAuth 2.0) > Request Access**.
-* A client ID located in **Developer Console > Products > ID Service > Client ID**.
-* A registered redirect URI **Developer Console > Products > ID Service > Redirect URI**.
+* A client ID that you can find in **Developer Console > Products > ID Service > CLIENT ID (APPLICATION ID)**.
+* A redirect URI registered in **Developer Console > Products > ID Service > REDIRECT URI**.
 
 For more information about the initial setup, see [Get started](https://docs.skymavis.com/mavis/mavis-id/guides/get-started).
 
@@ -45,13 +45,13 @@ let id = Client(
 Parameters:
 
 * `address`: the URL of Mavis ID. This is the base URL for all API calls.
-* `clientId`: the client ID registered in Mavis ID settings in the Developer Console. This is used to identify your application.
+* `clientId`: the client ID registered in Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications). This is used to identify your app.
 * `chainRpc`: Ronin's RPC URL. In this example, the Saigon testnet. For more information, see [RPC endpoints](https://docs.skymavis.com/ronin/rpc/overview#rpc-endpoints).
 * `chainId`: the ID of the blockchain network. In this example, it's set to `2021` for the Saigon testnet. For the Ronin mainnet, use `2020`.
 
 ## Usage
 
-* All functions of the SDK return a `string` in the format of the deeplink schema that you registered in the Mavis ID settings in the Developer Console.
+* All functions of the SDK return a `string` in the format of the deeplink schema that you registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 * You can parse strings using the `parseDeepLink` utility function or do it manually. For more information, see [Utilities](#utilities).
 
 ### Authorize users
@@ -66,7 +66,7 @@ Parameters:
 
 * `from`: the `UIViewController` of your app.
 * `state`: a unique random identifier used to manage requests from the client to Mavis ID.
-* `redirect`: the redirect URI registered in the Mavis ID settings in the Developer Console.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 
 Example:
 
@@ -85,7 +85,7 @@ Example:
 }
 ```
 
-### Send transaction
+### Send transactions
 
 Transfers RON tokens to a recipient's address, returning a transaction hash.
 
@@ -97,7 +97,7 @@ Parameters:
 
 * `from`: the `UIViewController` of your app.
 * `state`: a unique random identifier used to manage requests from the client to Mavis ID.
-* `redirect`: the redirect URI registered in the Mavis ID settings in the Developer Console.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 * `to`: the recipient's address.
 * `value`: the amount to send, in wei.
 
@@ -121,7 +121,7 @@ Example:
 }
 ```
 
-### Sign message
+### Sign messages
 
 Sign a plain text message, returning a signature.
 
@@ -133,7 +133,7 @@ Parameters:
 
 * `from`: the `UIViewController` of your app.
 * `state`: a unique random identifier used to manage requests from the client to Mavis ID.
-* `redirect`: the redirect URI registered in the Mavis ID settings in the Developer Console.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 * `message`: the message to sign.
 
 Example:
@@ -167,7 +167,7 @@ Parameters:
 
 * `from`: the `UIViewController` of your app.
 * `state`: a unique random identifier used to manage requests from the client to Mavis ID.
-* `redirect`: the redirect URI registered in the Mavis ID settings in the Developer Console.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications/).
 * `typedData`: typed data structured using EIP-712.
 
 Example:
@@ -247,7 +247,7 @@ Example:
     }
 ```
 
-### Call contract
+### Call contracts
 
 Executes a custom transaction on a specified smart contract, returning a transaction hash.
 
@@ -259,7 +259,7 @@ Parameters:
 
 * `from`: the `UIViewController` of your app.
 * `state`: a unique random identifier used to manage requests from the client to Mavis ID.
-* `redirect`: the redirect URI registered in the Mavis ID settings in the Developer Console.
+* `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications/).
 * `contractAddress`: the address of the smart contract to interact with.
 * `data`: encoded transaction data.
 * `value`: optionally, the value in wei.
@@ -292,7 +292,7 @@ Use to generate a random UUID.
 static func generateRandomState() -> String
 ```
 
-### Parse deeplink
+### Parse deeplinks
 
 Use to parse a deeplink returned by a function, and assign it to a `Response` object.
 
