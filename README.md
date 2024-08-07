@@ -46,8 +46,8 @@ Parameters:
 
 * `address`: the URL of Mavis ID, serving as the base URL for all API calls.
 * `clientId`: the client ID registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
-* `chainRpc`: Ronin's RPC URL. In this example, the Saigon testnet. For more information, see [RPC endpoints](https://docs.skymavis.com/ronin/rpc/overview#rpc-endpoints).
-* `chainId`: the ID of the blockchain network. In this example, `2021` for the Saigon testnet. For the Ronin mainnet, use `2020`.
+* `chainRpc`: the RPC endpoint through which you want to connect to Ronin: `https://saigon-testnet.roninchain.com/rpc` is a public endpoint for the Saigon testnet. For other endpoints, see [RPC endpoints](https://docs.skymavis.com/ronin/rpc/overview#rpc-endpoints).
+* `chainId`: the ID of the Ronin chain you want to connect to: `2021` for the Saigon testnet and `2020` for the Ronin mainnet.
 
 ## Usage
 
