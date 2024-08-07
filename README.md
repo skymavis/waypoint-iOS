@@ -99,7 +99,7 @@ Parameters:
 * `state`: a unique random identifier used to manage requests from the client to Mavis ID.
 * `redirect`: the redirect URI registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 * `to`: the recipient's address.
-* `value`: the amount to send, in wei.
+* `value`: the amount of RON to send, specified in wei (1 RON = 10^18 wei).
 
 Example:
 
