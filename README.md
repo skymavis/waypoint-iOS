@@ -123,7 +123,7 @@ Example:
 
 ### Sign messages
 
-Sign a plain text message, returning a signature.
+Sign a plain text message, returning a signature in hex format.
 
 ```swift
 public func personalsign(from viewcontroller: uiviewcontroller, state: string, redirect: string, message: string) async -> string
@@ -157,7 +157,7 @@ Example:
 
 ### Sign typed data
 
-Signs data structured according to the [EIP-712](https://eips.ethereum.org/EIPS/eip-712) standard, returning a signature. Also signs typed data of an axie.
+Signs data structured according to the [EIP-712](https://eips.ethereum.org/EIPS/eip-712) standard, returning a signature in hex format. Also signs typed data of an axie.
 
 ```swift
 func signTypeData(from viewController: UIViewController, state: String, redirect: String, typedData: String) async -> String
