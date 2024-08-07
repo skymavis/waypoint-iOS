@@ -1,5 +1,3 @@
-Here it goes:
-
 # Mavis ID iOS SDK
 
 The Mavis ID iOS SDK lets developers integrate Mavis ID into mobile apps developed for the iOS platform. After the integration, users can sign in to your app with Mavis ID and create an embedded Web3 wallet to interact with the blockchain to send and receive tokens, sign messages, and more.
