@@ -313,3 +313,7 @@ public class Response {
     private var state: String?
 }
 ```
+
+## See also
+
+For more information about Mavis ID, see the [official documentation](https://docs.skymavis.com/mavis/mavis-id/overview).
