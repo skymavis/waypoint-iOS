@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		966F7CC52C61D57F00D28A48 /* id in Frameworks */ = {isa = PBXBuildFile; productRef = 966F7CC42C61D57F00D28A48 /* id */; };
 		96F381F62C5CD757000ABDDD /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F381F52C5CD757000ABDDD /* AppDelegate.swift */; };
 		96F381F82C5CD757000ABDDD /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F381F72C5CD757000ABDDD /* SceneDelegate.swift */; };
 		96F381FA2C5CD757000ABDDD /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F381F92C5CD757000ABDDD /* ViewController.swift */; };
@@ -16,7 +17,6 @@
 		96F3820D2C5CD758000ABDDD /* DemoAppTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F3820C2C5CD758000ABDDD /* DemoAppTests.swift */; };
 		96F382172C5CD758000ABDDD /* DemoAppUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F382162C5CD758000ABDDD /* DemoAppUITests.swift */; };
 		96F382192C5CD758000ABDDD /* DemoAppUITestsLaunchTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96F382182C5CD758000ABDDD /* DemoAppUITestsLaunchTests.swift */; };
-		96F382272C5CD7A3000ABDDD /* id in Frameworks */ = {isa = PBXBuildFile; productRef = 96F382262C5CD7A3000ABDDD /* id */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -57,7 +57,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				96F382272C5CD7A3000ABDDD /* id in Frameworks */,
+				966F7CC52C61D57F00D28A48 /* id in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,6 +78,13 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		966F7CC32C61D57F00D28A48 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 		96F381E92C5CD757000ABDDD = {
 			isa = PBXGroup;
 			children = (
@@ -85,6 +92,7 @@
 				96F3820B2C5CD758000ABDDD /* DemoAppTests */,
 				96F382152C5CD758000ABDDD /* DemoAppUITests */,
 				96F381F32C5CD757000ABDDD /* Products */,
+				966F7CC32C61D57F00D28A48 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -146,7 +154,7 @@
 			);
 			name = DemoApp;
 			packageProductDependencies = (
-				96F382262C5CD7A3000ABDDD /* id */,
+				966F7CC42C61D57F00D28A48 /* id */,
 			);
 			productName = DemoApp;
 			productReference = 96F381F22C5CD757000ABDDD /* DemoApp.app */;
@@ -221,7 +229,7 @@
 			);
 			mainGroup = 96F381E92C5CD757000ABDDD;
 			packageReferences = (
-				96F382252C5CD7A3000ABDDD /* XCRemoteSwiftPackageReference "iOS-test-publish" */,
+				966F7CC22C61D40900D28A48 /* XCRemoteSwiftPackageReference "mavis-id-iOS" */,
 			);
 			productRefGroup = 96F381F32C5CD757000ABDDD /* Products */;
 			projectDirPath = "";
@@ -619,20 +627,20 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		96F382252C5CD7A3000ABDDD /* XCRemoteSwiftPackageReference "iOS-test-publish" */ = {
+		966F7CC22C61D40900D28A48 /* XCRemoteSwiftPackageReference "mavis-id-iOS" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/thienNH0/iOS-test-publish";
+			repositoryURL = "https://github.com/skymavis/mavis-id-iOS";
 			requirement = {
 				kind = upToNextMajorVersion;
-				minimumVersion = 1.0.0;
+				minimumVersion = 0.1.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		96F382262C5CD7A3000ABDDD /* id */ = {
+		966F7CC42C61D57F00D28A48 /* id */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 96F382252C5CD7A3000ABDDD /* XCRemoteSwiftPackageReference "iOS-test-publish" */;
+			package = 966F7CC22C61D40900D28A48 /* XCRemoteSwiftPackageReference "mavis-id-iOS" */;
 			productName = id;
 		};
 /* End XCSwiftPackageProductDependency section */

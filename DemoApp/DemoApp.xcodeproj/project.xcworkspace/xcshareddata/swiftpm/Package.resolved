@@ -1,12 +1,12 @@
 {
   "pins" : [
     {
-      "identity" : "ios-test-publish",
+      "identity" : "mavis-id-ios",
       "kind" : "remoteSourceControl",
-      "location" : "https://github.com/thienNH0/iOS-test-publish",
+      "location" : "https://github.com/skymavis/mavis-id-iOS",
       "state" : {
-        "revision" : "84da40effd9d7b24b7b0ce6d029eb94b0bd77d5d",
-        "version" : "1.0.1"
+        "revision" : "4f1f7715b870fc759e674bcfe82f1d056fb76975",
+        "version" : "0.1.0"
       }
     }
   ],

@@ -12,10 +12,6 @@ import id
 
 class ViewController: UIViewController {
     
-    // Import ID SDK
-    import id
-
-    
     let id = Client(
         address: "https://id.skymavis.com",
         clientId: "{YOUR_CLIENT_ID}",
