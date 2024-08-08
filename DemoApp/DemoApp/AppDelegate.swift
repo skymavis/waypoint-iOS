@@ -1,10 +1,3 @@
-//
-//  AppDelegate.swift
-//  DemoApp
-//
-//  Created by Thien Nguyen on 02/08/2024.
-//
-
 import UIKit
 
 @main

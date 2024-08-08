@@ -1,10 +1,3 @@
-//
-//  Utils.swift
-//  id
-//
-//  Created by Thien Nguyen on 19/07/2024.
-//
-
 import Foundation
 
 public struct Utils {

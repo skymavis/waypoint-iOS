@@ -1,9 +1,3 @@
-//
-//  CustomTab.swift
-//  id
-//
-//  Created by Thien Nguyen on 17/07/2024.
-//
 import Foundation
 import AuthenticationServices
 

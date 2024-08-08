@@ -1,10 +1,3 @@
-//
-//  ViewController.swift
-//  id-demo
-//
-//  Created by Thien Nguyen on 27/03/2024.
-//
-
 import UIKit
 
 // Import ID SDK
@@ -14,7 +7,8 @@ class ViewController: UIViewController {
     
     let id = Client(
         address: "https://id.skymavis.com",
-        clientId: "{YOUR_CLIENT_ID}",
+        // Replace with your client id registered with ID on https://developer.skymavis.com
+        clientId: "${YOUR_CLIENT_ID}",
         chainRpc: "https://saigon-testnet.roninchain.com/rpc",
         chainId: 2021
     )
@@ -74,7 +68,7 @@ class ViewController: UIViewController {
                    State: \(String(describing: response.getState()))
                    """
         // Create and configure the alert controller
-        let alertController = UIAlertController(title: "Deep Link Info", message: message, preferredStyle: .alert)
+        let alertController = UIAlertController(title: "Mavis ID response", message: message, preferredStyle: .alert)
         
         // Add an OK action to dismiss the alert
         alertController.addAction(UIAlertAction(title: "OK", style: .default))
@@ -114,7 +108,7 @@ class ViewController: UIViewController {
             let result = await id.authorize(from: self, state: state, redirect: redirect)
             print("Auth result : " + result)
             // Optional
-            let response = Utils.parseDeepLink(deeplink: result)
+            self.handleDeepLink(result: result)
         }
     }
     

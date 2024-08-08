@@ -1,10 +1,3 @@
-//
-//  UnityBridge.swift
-//  id
-//
-//  Created by Thien Nguyen on 23/04/2024.
-//
-
 import Foundation
 import UIKit
 
@@ -124,4 +117,3 @@ public func callContract(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int
     }
     
 }
-

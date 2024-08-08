@@ -1,10 +1,3 @@
-//
-//  Client.swift
-//  id
-//
-//  Created by Thien Nguyen on 27/03/2024.
-//
-//
 import Foundation
 import SafariServices
 
