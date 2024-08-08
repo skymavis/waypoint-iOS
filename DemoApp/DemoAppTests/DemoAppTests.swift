@@ -1,10 +1,3 @@
-//
-//  DemoAppTests.swift
-//  DemoAppTests
-//
-//  Created by Thien Nguyen on 02/08/2024.
-//
-
 import XCTest
 @testable import DemoApp
 

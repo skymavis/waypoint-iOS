@@ -1,21 +1,14 @@
-//
-//  Client.swift
-//  id
-//
-//  Created by Thien Nguyen on 27/03/2024.
-//
-//
 import Foundation
 import SafariServices
 
 public class Client {
-    var address : String
+    var idOrigin : String
     var clientId : String
     var chainRpc : String
     var chainId : Int
     
-    public init(address: String, clientId: String, chainRpc: String, chainId: Int) {
-        self.address = address
+    public init(idOrigin: String, clientId: String, chainRpc: String, chainId: Int) {
+        self.idOrigin = idOrigin
         self.clientId = clientId
         self.chainRpc = chainRpc
         self.chainId = chainId
@@ -23,7 +16,7 @@ public class Client {
     
     
     private func send(from viewController: UIViewController, redirect : String, request: Request) async -> String {
-        var urlString = address
+        var urlString = idOrigin
         
         switch request.method {
         case "authorize":

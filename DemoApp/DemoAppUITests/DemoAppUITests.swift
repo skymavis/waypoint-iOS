@@ -1,10 +1,3 @@
-//
-//  DemoAppUITests.swift
-//  DemoAppUITests
-//
-//  Created by Thien Nguyen on 02/08/2024.
-//
-
 import XCTest
 
 final class DemoAppUITests: XCTestCase {

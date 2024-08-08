@@ -1,10 +1,3 @@
-//
-//  Request.swift
-//  id
-//
-//  Created by Thien Nguyen on 27/03/2024.
-//
-
 import Foundation
 
 class Request {
@@ -16,4 +9,3 @@ class Request {
         self.params = params
     }
 }
-
