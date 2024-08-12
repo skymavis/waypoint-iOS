@@ -1,10 +1,9 @@
 Pod::Spec.new do |spec|
   spec.name         = "id"
   spec.version      = "0.1.1"
-  spec.summary      = "A framework to interact with Mavis ID."
+  spec.summary      = "An SDK for integrating Mavis ID single sign-on and Web3 wallet features into iOS apps."
   spec.description  = <<-DESC
-                      The Mavis ID iOS SDK lets developers integrate Mavis ID into mobile apps developed for the iOS platform.
-                       After the integration, users can sign in to your app with Mavis ID and create an embedded Web3 wallet to interact with the blockchain to send and receive tokens, sign messages, and more.
+                      The Mavis ID iOS SDK allows developers to integrate Mavis ID into iOS apps. Users can sign in with Mavis ID and create an embedded Web3 wallet to interact with the blockchain, enabling token transactions, message signing, and more.
                        DESC
 
 
