@@ -67,7 +67,7 @@ Authorizes a user with an existing Mavis ID account, returning an ID token and t
 
 ### Send transactions
 
-Transfers 1 RON to another address, returning a transaction hash.
+Transfers 0.1 RON to another address, returning a transaction hash.
 
 ```swift
 @objc func sendTransactionTapped() -> Void {
@@ -75,7 +75,7 @@ Transfers 1 RON to another address, returning a transaction hash.
     let state = Utils.generateRandomState()
     // Receiver address
     let to = "${YOUR_RECEIVER_ADDRESS}"
-    // 1 RON in wei
+    // 0.1 RON in wei
     let value = "100000000000000000"
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
