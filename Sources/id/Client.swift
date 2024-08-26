@@ -1,14 +1,14 @@
 import Foundation
 import SafariServices
 
-public class Client {
-    var idOrigin : String
+public class Waypoint {
+    var waypointOrigin : String
     var clientId : String
     var chainRpc : String
     var chainId : Int
     
-    public init(idOrigin: String, clientId: String, chainRpc: String, chainId: Int) {
-        self.idOrigin = idOrigin
+    public init(waypointOrigin: String, clientId: String, chainRpc: String, chainId: Int) {
+        self.waypointOrigin = waypointOrigin
         self.clientId = clientId
         self.chainRpc = chainRpc
         self.chainId = chainId
@@ -16,7 +16,7 @@ public class Client {
     
     
     private func send(from viewController: UIViewController, redirect : String, request: Request) async -> String {
-        var urlString = idOrigin
+        var urlString = waypointOrigin
         
         switch request.method {
         case "authorize":
@@ -53,7 +53,7 @@ public class Client {
                 }
             }
             result = callbackURL.absoluteString
-            
+
         } catch let error as CustomTabError {
             DispatchQueue.main.async {
                 print("Authentication failed with error: \(error.message), code: \(error.code)")
