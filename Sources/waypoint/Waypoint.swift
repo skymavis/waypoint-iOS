@@ -112,7 +112,7 @@ public class Waypoint {
         
     }
     
-    public func signTypeData(from viewController: UIViewController, state : String, redirect: String, typedData: String) async -> String {
+    public func signTypedData(from viewController: UIViewController, state : String, redirect: String, typedData: String) async -> String {
         let params = ["state": state, "clientId": self.clientId, "redirect": redirect, "typedData": typedData]
         let request = Request(method: "sign", params: params)
         return await self.send(from: viewController, redirect: redirect, request: request)

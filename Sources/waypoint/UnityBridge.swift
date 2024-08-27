@@ -24,7 +24,7 @@ public func initClient(address: UnsafePointer<Int8>, clientId: UnsafePointer<Int
     let clientIdString = String(cString: clientId)
     let chainRpcString = String(cString: chainRpc)
     let chainIdInt = Int(chainId)
-    ClientManager.shared.initClient(address: addressString, clientId: clientIdString, chainRpc: chainRpcString, chainId: chainIdInt)
+    WaypointManager.shared.initWaypoint(address: addressString, clientId: clientIdString, chainRpc: chainRpcString, chainId: chainIdInt)
 }
 
 @_cdecl("authorize")
@@ -35,7 +35,7 @@ public func authorize(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>)
     // Anything relate to UI should be in main thread
     DispatchQueue.main.async {
         guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
+        guard let client = WaypointManager.shared.getClient() else { return }
         Task {
             await client.authorize(from: viewController, state: stateString, redirect: redirectString)
         }
@@ -51,7 +51,7 @@ public func personalSign(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int
     
     DispatchQueue.main.async {
         guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
+        guard let client = WaypointManager.shared.getClient() else { return }
         Task {
             await client.personalSign(from: viewController, state: stateString, redirect: redirectString,  message: messageString)
         }
@@ -66,9 +66,9 @@ public func signTypeData(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int
     let typedDataString = String(cString: typedData)
     DispatchQueue.main.async {
         guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
+        guard let client = WaypointManager.shared.getClient() else { return }
         Task {
-            await client.signTypeData(from: viewController, state: stateString, redirect: redirectString,  typedData: typedDataString)
+            await client.signTypedData(from: viewController, state: stateString, redirect: redirectString,  typedData: typedDataString)
         }
     }
 }
@@ -83,7 +83,7 @@ public func sendTransaction(state: UnsafePointer<Int8>,redirect: UnsafePointer<I
     let valueString = String(cString: value)
     DispatchQueue.main.async {
         guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
+        guard let client = WaypointManager.shared.getClient() else { return }
         Task {
             await client.sendTransaction(from: viewController, state: stateString, redirect: redirectString,  to: toString, value: valueString)
         }
@@ -103,7 +103,7 @@ public func callContract(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int
     }
     DispatchQueue.main.async {
         guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
+        guard let client = WaypointManager.shared.getClient() else { return }
         
         if let valueString = valueString {
             Task {
