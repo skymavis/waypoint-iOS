@@ -34,7 +34,7 @@ public class Waypoint {
         // Append parameters as query string
         var components = URLComponents(string: urlString)!
         components.queryItems = request.params.map { URLQueryItem(name: $0.key, value: $0.value) }
-                
+        
         guard let url = components.url else {
             return ""
         }
@@ -115,7 +115,7 @@ public class Waypoint {
     public func personalSign(from viewController: UIViewController, state : String, redirect: String, from: String? = nil, message: String) async -> String {
         var params = ["state": state, "clientId": self.clientId, "message": message, "redirect": redirect]
         // Use for multiple wallet
-
+        
         if(from != nil) {
             params["expectAddress"] = from
         }

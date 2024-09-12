@@ -7,7 +7,6 @@ struct CustomTabError: Error {
 }
 
 class CustomTab: NSObject {
-    
     func startSession(url: URL, callbackURLScheme: String) async throws -> URL {
         return try await withCheckedThrowingContinuation { continuation in
             var session: ASWebAuthenticationSession? = nil
@@ -24,7 +23,6 @@ class CustomTab: NSObject {
                     continuation.resume(throwing: authError)
                 }
             }
-            
             session?.presentationContextProvider = self
             // Indicates whether the session should ask the browser for a private authentication session
             session?.prefersEphemeralWebBrowserSession = false

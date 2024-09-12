@@ -92,7 +92,7 @@ public func signTygpedData(state: UnsafePointer<Int8>, redirect: UnsafePointer<I
 
 
 @_cdecl("sendTransaction")
-public func sendTransaction(state: UnsafePointer<Int8>,redirect: UnsafePointer<Int8>, from :UnsafePointer<Int8>? = nil, to: UnsafePointer<Int8>, value: UnsafePointer<Int8>) {
+public func sendTransaction(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, from :UnsafePointer<Int8>? = nil, to: UnsafePointer<Int8>, value: UnsafePointer<Int8>) {
     // Convert to string match with c# primitive type
     let stateString = String(cString: state)
     let redirectString = String(cString: redirect)
@@ -116,7 +116,7 @@ public func sendTransaction(state: UnsafePointer<Int8>,redirect: UnsafePointer<I
     }
 }
 @_cdecl("callContract")
-public func callContract(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, contractAddress: UnsafePointer<Int8>, data: UnsafePointer<Int8>, value : UnsafePointer<Int8>? = nil,from :UnsafePointer<Int8>? = nil) {
+public func callContract(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, contractAddress: UnsafePointer<Int8>, data: UnsafePointer<Int8>, value : UnsafePointer<Int8>? = nil, from :UnsafePointer<Int8>? = nil) {
     // Convert to string match with c# primitive type
     let stateString = String(cString: state)
     let redirectString = String(cString: redirect)
@@ -138,7 +138,7 @@ public func callContract(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int
         let capturedValueString = valueString
         let capturedFromString = fromString
         Task {
-            await client.callContract(from: viewController, state: stateString, redirect: redirectString,from: capturedFromString, contractAddress: contractAddressString, data: dataString, value: capturedValueString)
+            await client.callContract(from: viewController, state: stateString, redirect: redirectString, from: capturedFromString, contractAddress: contractAddressString, data: dataString, value: capturedValueString)
         }
     }
     
