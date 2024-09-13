@@ -1,14 +1,12 @@
-# Waypoint iOS SDK
+# Ronin Waypoint iOS SDK
 
-The Waypoint iOS SDK lets developers integrate Waypoint into mobile apps developed for the iOS platform. After the integration, users can sign in to your app with Waypoint and create an embedded Web3 wallet to interact with the blockchain to send and receive tokens, sign messages, and more.
+The Ronin Waypoint iOS SDK lets developers integrate the account and wallet features of the Ronin Waypoint service into iOS apps developed with Swift. After the integration, users can sign in to your game with their Ronin Waypoint account and connect their keyless wallet for instant in-game transactions.
 
 ## Features
 
-- Authorize users: sign in to your app with Waypoint.
-- Send transactions: transfer tokens to other addresses.
-- Sign messages: sign plain text messages.
-- Sign typed data: sign structured data according to the EIP-712 standard.
-- Call contracts: execute custom transactions on smart contracts.
+- Authorize users: let users sign in to your app with Ronin Waypoint to connect their keyless wallet and an optional EOA wallet.
+- Send transactions: transfer RON, ERC-20 tokens, and make contract calls for in-game transactions.
+- Sign messages and typed data: prove ownership of a wallet or sign structured data.
 
 ## Prerequisites
 
@@ -33,7 +31,7 @@ For more information about the initial setup, see [Get started](https://docs.sky
 ## Initialization
 
 ```swift
-// Import Waypoint SDK
+// Import Ronin Waypoint SDK
 import waypoint
  let waypoint = Waypoint(
     // Base URL of Waypoint for all API calls
