@@ -1,54 +1,58 @@
-# Mavis ID iOS SDK
+# Ronin Waypoint iOS SDK
 
-The Mavis ID iOS SDK lets developers integrate Mavis ID into mobile apps developed for the iOS platform. After the integration, users can sign in to your app with Mavis ID and create an embedded Web3 wallet to interact with the blockchain to send and receive tokens, sign messages, and more.
+The Ronin Waypoint iOS SDK lets developers integrate the account and wallet features of the Ronin Waypoint service into iOS apps developed with Swift. After the integration, users can sign in to your game with their Ronin Waypoint account and connect their keyless wallet for instant in-game transactions.
 
 ## Features
 
-- Authorize users: sign in to your app with Mavis ID.
-- Send transactions: transfer tokens to other addresses.
-- Sign messages: sign plain text messages.
-- Sign typed data: sign structured data according to the EIP-712 standard.
-- Call contracts: execute custom transactions on smart contracts.
+- Authorize users: let users sign in to your app with Ronin Waypoint to connect their keyless wallet and an optional EOA wallet.
+- Send transactions: transfer RON, ERC-20 tokens, and make contract calls for in-game transactions.
+- Sign messages and typed data: prove ownership of a wallet or sign structured data.
 
 ## Prerequisites
 
 - [iOS 13.0](https://developer.apple.com/ios/) or later and [Xcode](https://developer.apple.com/xcode/).
 - An app created in the [Developer Console](https://developers.skymavis.com/console/applications/).
-- Permission to use Mavis ID. Request in **Developer Console > your app > App Permission > Sky Mavis Account (OAuth 2.0) > Request Access**.
-- A client ID located in **Developer Console > Products > ID Service > Client ID**.
-- A registered redirect URI **Developer Console > Products > ID Service > Redirect URI**.
+- Permission to use Waypoint. Request in **Developer Console > your app > App Permission > Sky Mavis Account (OAuth 2.0) > Request Access**.
+- A client ID located in **Developer Console > Products > Waypoint Service > Client ID**.
+- A registered redirect URI **Developer Console > Products > Waypoint Service > Redirect URI**.
 
 For more information about the initial setup, see [Get started](https://docs.skymavis.com/mavis/mavis-id/guides/get-started).
 
 ## Installation
 
-In Xcode, select your target, then go to **General > + > Add Other > Add Package Dependency**, and then enter this repository URL: `https://github.com/skymavis/mavis-id-iOS`.
+### Swift Package Manager
+
+- In Xcode, select your target, then go to **General > + > Add Other > Add Package Dependency**, and then enter this repository URL: `https://github.com/skymavis/waypoint-iOS`.
+
+### Cocoapods
+
+- In `Podfile` -> Add `pod 'SkyMavis-Waypoint', '0.1.3'`
 
 ## Initialization
 
 ```swift
-import id
-
-let id = Client(
-    // Base URL of Mavis ID for all API calls
-    idOrigin : "https://id.skymavis.com",
-    // Client ID registered in the Mavis ID settings in the Developer Console
-    clientId: "{YOUR_CLIENT_ID}",
-    // Saigon testnet public RPC endpoint 
-    chainRpc: "https://saigon-testnet.roninchain.com/rpc",
+// Import Ronin Waypoint SDK
+import waypoint
+ let waypoint = Waypoint(
+    // Base URL of Waypoint for all API calls
+        waypointOrigin: "https://waypoint.roninchain.com",
+    // Client ID registered in the Waypoint settings in the Developer Console
+        clientId: "{YOUR_CLIENT_ID}",
+    // Saigon testnet public RPC endpoint
+        chainRpc: "https://saigon-testnet.roninchain.com/rpc",
     // Saigon testnet chain ID
-    chainId: 2021
-)
+        chainId: 2021
+    )
 ```
 
 ## Usage
 
-- All functions of the SDK return a `string` in the format of the deeplink schema that you registered in the Mavis ID settings in the [Developer Console](https://developers.skymavis.com/console/applications).
+- All functions of the SDK return a `string` in the format of the deeplink schema that you registered in the Waypoint settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 - You can parse strings using the `parseDeepLink` utility function or do it manually. For more information, see [Utilities](#utilities).
 
 ### Authorize users
 
-Authorizes a user with an existing Mavis ID account, returning an ID token and the user's wallet address. If the user does not have an account, they will be prompted to create one.
+Authorizes a user with an existing Waypoint account, returning an ID token and the user's wallet address. If the user does not have an account, they will be prompted to create one.
 
 ```swift
 // Implement the action for authorization
@@ -58,7 +62,8 @@ Authorizes a user with an existing Mavis ID account, returning an ID token and t
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
-        let result = await id.authorize(from: self, state: state, redirect: redirect)
+        // waypoint instance init above
+        let result = await waypoint.authorize(from: self, state: state, redirect: redirect)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
     }
@@ -80,7 +85,8 @@ Transfers 0.1 RON to another address, returning a transaction hash.
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
-        let result = await id.sendTransaction(from: self, state: state, redirect: redirect, to: to, value: value)
+        // waypoint instance init above
+        let result = await waypoint.sendTransaction(from: self, state: state, redirect: redirect, to: to, value: value)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
     }
@@ -100,7 +106,8 @@ Signs a plain text message, returning a signature.
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
-        let result = await id.personalSign(from: self, state: state, redirect: redirect, message: message)
+        // waypoint instance init above
+        let result = await waypoint.personalSign(from: self, state: state, redirect: redirect, message: message)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
 
@@ -180,7 +187,8 @@ Signs [EIP-712](https://eips.ethereum.org/EIPS/eip-712) typed data for an order 
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
-        let result = await id.signTypeData(from: self, state: state, redirect: redirect, typedData: typedData)
+        // waypoint instance init above
+        let result = await waypoint.signTypeData(from: self, state: state, redirect: redirect, typedData: typedData)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
     }
@@ -200,7 +208,8 @@ Allows another contract to spend 1 RON on user's behalf, returning a transaction
     // Use the SDK utility to generate a random state
     let state = Utils.generateRandomState()
     Task {
-        let result = await id.callContract(from: self, state: state, redirect: redirect, contractAddress: contractAddress, data: data)
+        // waypoint instance init above
+        let result = await waypoint.callContract(from: self, state: state, redirect: redirect, contractAddress: contractAddress, data: data)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
     }
@@ -227,7 +236,7 @@ static func parseDeepLink(deeplink: String) -> Response
 
 ### Response
 
-A setter, getter class to save the result from Mavis ID.
+A setter, getter class to save the result from Waypoint.
 
 ```swift
 public class Response {
@@ -241,4 +250,4 @@ public class Response {
 
 ## Documentation
 
-For more information, see the [Mavis ID iOS SDK]([https://docs.skymavis.com/mavis/mavis-id/overview](https://docs.skymavis.com/mavis/mavis-id/guides/ios-sdk) integration guide.
+For more information, see the [Waypoint iOS SDK]([https://docs.skymavis.com/mavis/mavis-id/overview](https://docs.skymavis.com/mavis/mavis-id/guides/ios-sdk) integration guide.
