@@ -12,7 +12,7 @@ The Ronin Waypoint iOS SDK lets developers integrate the account and wallet feat
 
 - [iOS 13.0](https://developer.apple.com/ios/) or later and [Xcode](https://developer.apple.com/xcode/).
 - An app created in the [Developer Console](https://developers.skymavis.com/console/applications/).
-- Permission to use Waypoint. Request in **Developer Console > your app > App Permission > Sky Mavis Account (OAuth 2.0) > Request Access**.
+- Permission to use Ronin Waypoint. Request in **Developer Console > your app > App Permission > Sky Mavis Account (OAuth 2.0) > Request Access**.
 - A client ID located in **Developer Console > Products > Waypoint Service > Client ID**.
 - A registered redirect URI **Developer Console > Products > Waypoint Service > Redirect URI**.
 
@@ -34,7 +34,7 @@ For more information about the initial setup, see [Get started](https://docs.sky
 // Import Ronin Waypoint SDK
 import waypoint
  let waypoint = Waypoint(
-    // Base URL of Waypoint for all API calls
+    // Base URL of Ronin Waypoint for all API calls
         waypointOrigin: "https://waypoint.roninchain.com",
     // Client ID registered in the Waypoint settings in the Developer Console
         clientId: "{YOUR_CLIENT_ID}",
@@ -45,14 +45,14 @@ import waypoint
     )
 ```
 
-## Usage
+## Usage examples
 
-- All functions of the SDK return a `string` in the format of the deeplink schema that you registered in the Waypoint settings in the [Developer Console](https://developers.skymavis.com/console/applications).
+- All functions of the SDK return a `string` in the format of the deeplink schema that you registered in the Ronin Waypoint settings in the [Developer Console](https://developers.skymavis.com/console/applications).
 - You can parse strings using the `parseDeepLink` utility function or do it manually. For more information, see [Utilities](#utilities).
 
-### Authorize users
+### Authorize a user
 
-Authorizes a user with an existing Waypoint account, returning an ID token and the user's wallet address. If the user does not have an account, they will be prompted to create one.
+Initializes the authorization process, allowing a user to sign in or sign up for a Ronin Waypoint account, and connect their wallet. 
 
 ```swift
 // Implement the action for authorization
@@ -62,7 +62,7 @@ Authorizes a user with an existing Waypoint account, returning an ID token and t
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
-        // waypoint instance init above
+        // Ronin Waypoint instance initialized above
         let result = await waypoint.authorize(from: self, state: state, redirect: redirect)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
@@ -70,7 +70,7 @@ Authorizes a user with an existing Waypoint account, returning an ID token and t
 }
 ```
 
-### Send transactions
+### Send a transaction
 
 Transfers 0.1 RON to another address, returning a transaction hash.
 
@@ -85,7 +85,7 @@ Transfers 0.1 RON to another address, returning a transaction hash.
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
-        // waypoint instance init above
+        // Ronin Waypoint instance initialized above
         let result = await waypoint.sendTransaction(from: self, state: state, redirect: redirect, to: to, value: value)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
@@ -93,7 +93,7 @@ Transfers 0.1 RON to another address, returning a transaction hash.
 }
 ```
 
-### Sign message
+### Sign a message
 
 Signs a plain text message, returning a signature.
 
@@ -106,7 +106,7 @@ Signs a plain text message, returning a signature.
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
-        // waypoint instance init above
+        // Ronin Waypoint instance initialized above
         let result = await waypoint.personalSign(from: self, state: state, redirect: redirect, message: message)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
@@ -187,7 +187,7 @@ Signs [EIP-712](https://eips.ethereum.org/EIPS/eip-712) typed data for an order 
     // Example: "mydapp://callback"
     let redirect = "${YOUR_DEEPLINK_REDIRECT}"
     Task {
-        // waypoint instance init above
+        // Ronin Waypoint instance initialized above
         let result = await waypoint.signTypeData(from: self, state: state, redirect: redirect, typedData: typedData)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
@@ -195,7 +195,7 @@ Signs [EIP-712](https://eips.ethereum.org/EIPS/eip-712) typed data for an order 
     }
 ```
 
-### Call contracts
+### Call a contract
 
 Allows another contract to spend 1 RON on user's behalf, returning a transaction hash.
 
@@ -208,7 +208,7 @@ Allows another contract to spend 1 RON on user's behalf, returning a transaction
     // Use the SDK utility to generate a random state
     let state = Utils.generateRandomState()
     Task {
-        // waypoint instance init above
+        // Ronin Waypoint instance initialized above
         let result = await waypoint.callContract(from: self, state: state, redirect: redirect, contractAddress: contractAddress, data: data)
         // Optionally, use this utility to parse the result
         let response = Utils.parseDeepLink(deeplink: result)
@@ -218,7 +218,7 @@ Allows another contract to spend 1 RON on user's behalf, returning a transaction
 
 ## Utilities
 
-### Generate random state
+### Generate a random state
 
 Use to generate a random UUID.
 
@@ -226,7 +226,7 @@ Use to generate a random UUID.
 static func generateRandomState() -> String
 ```
 
-### Parse deeplink
+### Parse a deeplink
 
 Use to parse a deeplink returned by a function, and assign it to a `Response` object.
 
@@ -236,7 +236,7 @@ static func parseDeepLink(deeplink: String) -> Response
 
 ### Response
 
-A setter, getter class to save the result from Waypoint.
+A setter, getter class to save the result from Ronin Waypoint.
 
 ```swift
 public class Response {
@@ -250,4 +250,4 @@ public class Response {
 
 ## Documentation
 
-For more information, see the [Waypoint iOS SDK]([https://docs.skymavis.com/mavis/mavis-id/overview](https://docs.skymavis.com/mavis/mavis-id/guides/ios-sdk) integration guide.
+For more information, see the [Ronin Waypoint iOS SDK](https://docs.skymavis.com/mavis/ronin-waypoint/reference/ios-sdk) integration guide.
