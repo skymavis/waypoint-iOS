@@ -4,20 +4,17 @@ import AuthenticationServices
 enum CustomTabError: Error {
     case sessionStartFailed
     case userRejected
-    case noUrlOrErrorReturned
-    case presentationError
+    case noUrlReturned
     case other(message: String, code: Int)
 
     var message: String {
         switch self {
         case .sessionStartFailed:
-            return "Failed to start authentication session"
+            return "Failed to start session"
         case .userRejected:
-            return "User rejected request"
-        case .noUrlOrErrorReturned:
-            return "No URL or error returned"
-        case .presentationError:
-            return "Failed to present authentication window"
+            return "User rejected"
+        case .noUrlReturned:
+            return "No URL returned"
         case .other(let message, _):
             return message
         }
@@ -26,13 +23,11 @@ enum CustomTabError: Error {
     var code: Int {
         switch self {
         case .userRejected:
-            return -1
+            return 1000
         case .sessionStartFailed:
-            return -2
-        case .noUrlOrErrorReturned:
-            return -3
-        case .presentationError:
-            return -4
+            return 1001
+        case .noUrlReturned:
+            return 1002
         case .other(_, let code):
             return code
         }
@@ -44,11 +39,10 @@ final class CustomTab: NSObject {
         return try await withCheckedThrowingContinuation { continuation in
             let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { callbackURL, error in
                 if let error = error {
-                    if ((error as? ASWebAuthenticationSessionError)?.code) == ASWebAuthenticationSessionError.canceledLogin {
+                    if (error as? ASWebAuthenticationSessionError)?.code == ASWebAuthenticationSessionError.canceledLogin {
                         continuation.resume(throwing: CustomTabError.userRejected)
                         return
                     }
-
                     let nsError = error as NSError
                     continuation.resume(throwing: CustomTabError.other(
                         message: nsError.localizedDescription,
@@ -58,7 +52,7 @@ final class CustomTab: NSObject {
                 }
 
                 guard let callbackURL = callbackURL else {
-                    continuation.resume(throwing: CustomTabError.noUrlOrErrorReturned)
+                    continuation.resume(throwing: CustomTabError.noUrlReturned)
                     return
                 }
 
@@ -68,9 +62,8 @@ final class CustomTab: NSObject {
             session.presentationContextProvider = self
             session.prefersEphemeralWebBrowserSession = false
 
-            guard session.start() else {
+            if !session.start() {
                 continuation.resume(throwing: CustomTabError.sessionStartFailed)
-                return
             }
         }
     }

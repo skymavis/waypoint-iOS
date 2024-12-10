@@ -36,16 +36,16 @@ private func executeOnMain<T>(completion: @escaping (UIViewController, Waypoint)
 }
 
 @_cdecl("initClient")
-public func initClient(address: UnsafePointer<Int8>, clientId: UnsafePointer<Int8>, chainRpc: UnsafePointer<Int8>, chainId: Int32) {
+public func initClient(address: UnsafePointer<Int8>, clientId: UnsafePointer<Int8>, rpcUrl: UnsafePointer<Int8>, chainId: Int32) {
     let addressString = getString(from: address)
     let clientIdString = getString(from: clientId)
-    let chainRpcString = getString(from: chainRpc)
+    let rpcUrlString = getString(from: rpcUrl)
     let chainIdInt = Int(chainId)
 
     WaypointManager.shared.configure(
         waypointOrigin: addressString,
         clientId: clientIdString,
-        chainRpc: chainRpcString,
+        rpcUrl: rpcUrlString,
         chainId: chainIdInt
     )
 }
@@ -173,6 +173,20 @@ public func registerGuestAccount(state: UnsafePointer<Int8>, redirect: UnsafePoi
 
     executeOnMain { viewController, client in
         await client.registerGuestAccount(
+            from: viewController,
+            state: stateString,
+            redirect: redirectString
+        )
+    }
+}
+
+@_cdecl("createKeylessWallet")
+public func createKeylessWallet(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>) {
+    let stateString = getString(from: state)
+    let redirectString = getString(from: redirect)
+
+    executeOnMain { viewController, client in
+        await client.createKeylessWallet(
             from: viewController,
             state: stateString,
             redirect: redirectString

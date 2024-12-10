@@ -11,6 +11,8 @@ struct ServicePaths {
     static let wallet = "wallet"
     static let seamless = "seamless"
     static let start = "start"
+    static let setup = "setup"
+    static let introduce = "introduce"
 }
 
 struct RequestParams {

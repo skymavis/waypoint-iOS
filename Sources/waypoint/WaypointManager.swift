@@ -8,7 +8,7 @@ public final class WaypointManager {
     public func configure(
         waypointOrigin: String,
         clientId: String,
-        chainRpc: String,
+        rpcUrl: String,
         chainId: Int
     ) {
         guard waypointClient == nil else { return }
@@ -16,7 +16,7 @@ public final class WaypointManager {
         waypointClient = Waypoint(
             waypointOrigin: waypointOrigin,
             clientId: clientId,
-            chainRpc: chainRpc,
+            rpcUrl: rpcUrl,
             chainId: chainId
         )
     }

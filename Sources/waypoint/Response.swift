@@ -1,24 +1,23 @@
 import Foundation
 
+public struct ResponseError: Error {
+    let message: String
+    let code: Int
+}
+
 public struct Response {
-    private let success: Bool
-    private let method: String?
-    private let data: String?
-    private let address: String?
-    private let state: String?
+    public let success: Bool
+    public let error: ResponseError?
+    public let data: [String: String]
 
     public init(
         success: Bool = false,
-        method: String? = nil,
-        data: String? = nil,
-        address: String? = nil,
-        state: String? = nil
+        error: ResponseError? = nil,
+        data: [String: String] = [:]
     ) {
         self.success = success
-        self.method = method
+        self.error = error
         self.data = data
-        self.address = address
-        self.state = state
     }
 
     public static func parseDeepLink(deeplink: String) -> Response {
@@ -34,38 +33,30 @@ public struct Response {
             return Response()
         }
 
-        var queryParams: [String: String] = [:]
-        queryItems.forEach { item in
-            if let value = item.value {
-                queryParams[item.name] = value
-            }
+        let queryParams = Dictionary(uniqueKeysWithValues: queryItems.compactMap { item in
+            item.value.map { (item.name, $0) }
+        })
+
+        let isSuccess = queryParams["type"] == "success"
+
+        if !isSuccess {
+            let error = ResponseError(
+                message: queryParams["message"] ?? "Unknown error",
+                code: Int(queryParams["code"] ?? "0") ?? 0
+            )
+            return Response(
+                success: false,
+                error: error
+            )
         }
+
         return Response(
-            success: queryParams["type"] == "success",
-            method: queryParams["method"],
-            data: queryParams["data"],
-            address: queryParams["address"],
-            state: queryParams["state"]
+            success: true,
+            data: queryParams
         )
     }
 
-    public func getSuccess() -> Bool {
-        return success
-    }
-
-    public func getMethod() -> String? {
-        return method
-    }
-
-    public func getData() -> String? {
-        return data
-    }
-
-    public func getAddress() -> String? {
-        return address
-    }
-
-    public func getState() -> String? {
-        return state
+    public func getValue(for key: String) -> String? {
+        return data[key]
     }
 }
