@@ -2,144 +2,180 @@ import Foundation
 import UIKit
 
 private func initViewController() -> UIViewController? {
-    var viewController: UIViewController?
-    // KeyWindow deprecate in iOS 13
     if #available(iOS 13.0, *) {
-        // Use the first connected scene that is of type UIWindowScene and has a window property
-        let windowScene = UIApplication.shared.connectedScenes
-            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene
-        viewController = windowScene?.windows
-            .first(where: { $0.isKeyWindow })?.rootViewController
+        guard let windowScene = UIApplication.shared.connectedScenes
+            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
+              let viewController = windowScene.windows
+            .first(where: { $0.isKeyWindow })?.rootViewController else {
+            return nil
+        }
+        return viewController
     } else {
-        // Fallback on earlier versions
-        viewController = UIApplication.shared.keyWindow?.rootViewController
+        return UIApplication.shared.keyWindow?.rootViewController
     }
-    return viewController
+}
+
+private func getString(from pointer: UnsafePointer<Int8>) -> String {
+    return String(cString: pointer)
+}
+
+private func getOptionalString(from pointer: UnsafePointer<Int8>?) -> String? {
+    guard let pointer = pointer else { return nil }
+    return String(cString: pointer)
+}
+
+private func executeOnMain<T>(completion: @escaping (UIViewController, Waypoint) async -> T) {
+    DispatchQueue.main.async {
+        guard let viewController = initViewController(),
+              let client = WaypointManager.shared.client else { return }
+
+        Task {
+            await completion(viewController, client)
+        }
+    }
 }
 
 @_cdecl("initClient")
 public func initClient(address: UnsafePointer<Int8>, clientId: UnsafePointer<Int8>, chainRpc: UnsafePointer<Int8>, chainId: Int32) {
-    // Convert to string match with c# primitive
-    let addressString = String(cString: address)
-    let clientIdString = String(cString: clientId)
-    let chainRpcString = String(cString: chainRpc)
+    let addressString = getString(from: address)
+    let clientIdString = getString(from: clientId)
+    let chainRpcString = getString(from: chainRpc)
     let chainIdInt = Int(chainId)
-    ClientManager.shared.initClient(waypointOrigin: addressString, clientId: clientIdString, chainRpc: chainRpcString, chainId: chainIdInt)
+
+    WaypointManager.shared.configure(
+        waypointOrigin: addressString,
+        clientId: clientIdString,
+        chainRpc: chainRpcString,
+        chainId: chainIdInt
+    )
 }
 
 @_cdecl("authorize")
-public func authorize(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>) {
-    // Convert to string match with C# primitive
-    let redirectString = String(cString: redirect)
-    let stateString = String(cString: state)
-    // Anything relate to UI should be in main thread
-    DispatchQueue.main.async {
-        guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
-        Task {
-            await client.authorize(from: viewController, state: stateString, redirect: redirectString)
-        }
+public func authorize(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, scope: UnsafePointer<Int8>? = nil) {
+    let stateString = getString(from: state)
+    let redirectString = getString(from: redirect)
+    let scopeString = getOptionalString(from: scope)
+
+    executeOnMain { viewController, client in
+        await client.authorize(
+            from: viewController,
+            state: stateString,
+            redirect: redirectString,
+            scope: scopeString
+        )
     }
 }
 
 @_cdecl("personalSign")
-public func personalSign(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, message: UnsafePointer<Int8>, from :UnsafePointer<Int8>? = nil) {
-    // Convert to string match with c# primitive type
-    let stateString = String(cString: state)
-    let redirectString = String(cString: redirect)
-    let messageString = String(cString: message)
-    var fromString : String? = nil
-    
-    if let from = from {
-        fromString = String(cString: from)
-    }
-    DispatchQueue.main.async {
-        guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
-        
-        // Reference to captured var in concurrently-executing code; this is an error in Swift 6
-        let capturedFromString = fromString
-        
-        Task {
-            await client.personalSign(from: viewController, state: stateString, redirect: redirectString, from : capturedFromString, message: messageString)
-        }
+public func personalSign(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, message: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
+    let stateString = getString(from: state)
+    let redirectString = getString(from: redirect)
+    let messageString = getString(from: message)
+    let fromString = getOptionalString(from: from)
+
+    executeOnMain { viewController, client in
+        await client.personalSign(
+            from: viewController,
+            state: stateString,
+            redirect: redirectString,
+            message: messageString,
+            from: fromString
+        )
     }
 }
 
 @_cdecl("signTypedData")
-public func signTygpedData(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, typedData: UnsafePointer<Int8>, from :UnsafePointer<Int8>? = nil) {
-    // Convert to string match with c# primitive type
-    let stateString = String(cString: state)
-    let redirectString = String(cString: redirect)
-    let typedDataString = String(cString: typedData)
-    var fromString : String? = nil
-    
-    if let from = from {
-        fromString = String(cString: from)
-    }
-    
-    DispatchQueue.main.async {
-        guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
-        // Reference to captured var in concurrently-executing code; this is an error in Swift 6
-        let capturedFromString = fromString
-        
-        Task {
-            await client.signTypedData(from: viewController, state: stateString, redirect: redirectString,from: capturedFromString, typedData: typedDataString)
-        }
+public func signTypedData(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, typedData: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
+    let stateString = getString(from: state)
+    let redirectString = getString(from: redirect)
+    let typedDataString = getString(from: typedData)
+    let fromString = getOptionalString(from: from)
+
+    executeOnMain { viewController, client in
+        await client.signTypedData(
+            from: viewController,
+            state: stateString,
+            redirect: redirectString,
+            typedData: typedDataString,
+            from: fromString
+        )
     }
 }
-
 
 @_cdecl("sendTransaction")
-public func sendTransaction(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, from :UnsafePointer<Int8>? = nil, to: UnsafePointer<Int8>, value: UnsafePointer<Int8>) {
-    // Convert to string match with c# primitive type
-    let stateString = String(cString: state)
-    let redirectString = String(cString: redirect)
-    let toString = String(cString: to)
-    let valueString = String(cString: value)
-    var fromString : String? = nil
-    
-    if let from = from {
-        fromString = String(cString: from)
-    }
-    
-    DispatchQueue.main.async {
-        guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
-        // Reference to captured var in concurrently-executing code; this is an error in Swift 6
-        let capturedValueString = valueString
-        let capturedFromString = fromString
-        Task {
-            await client.sendTransaction(from: viewController, state: stateString, redirect: redirectString, from: capturedFromString, to: toString, value: capturedValueString)
-        }
+public func sendTransaction(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, to: UnsafePointer<Int8>, data: UnsafePointer<Int8>? = nil, value: UnsafePointer<Int8>? = nil, from: UnsafePointer<Int8>? = nil) {
+    let stateString = getString(from: state)
+    let redirectString = getString(from: redirect)
+    let toString = getString(from: to)
+    let dataString = getOptionalString(from: data)
+    let valueString = getOptionalString(from: value)
+    let fromString = getOptionalString(from: from)
+
+    executeOnMain { viewController, client in
+        await client.sendTransaction(
+            from: viewController,
+            state: stateString,
+            redirect: redirectString,
+            to: toString,
+            data: dataString,
+            value: valueString,
+            from: fromString
+        )
     }
 }
-@_cdecl("callContract")
-public func callContract(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, contractAddress: UnsafePointer<Int8>, data: UnsafePointer<Int8>, value : UnsafePointer<Int8>? = nil, from :UnsafePointer<Int8>? = nil) {
-    // Convert to string match with c# primitive type
-    let stateString = String(cString: state)
-    let redirectString = String(cString: redirect)
-    let contractAddressString = String(cString: contractAddress)
-    let dataString = String(cString: data)
-    var valueString: String? = nil
-    var fromString : String? = nil
-    
-    if let value = value {
-        valueString = String(cString: value)
+
+@_cdecl("sendNativeToken")
+public func sendNativeToken(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, to: UnsafePointer<Int8>, value: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
+    let stateString = getString(from: state)
+    let redirectString = getString(from: redirect)
+    let toString = getString(from: to)
+    let valueString = getString(from: value)
+    let fromString = getOptionalString(from: from)
+
+    executeOnMain { viewController, client in
+        await client.sendNativeToken(
+            from: viewController,
+            state: stateString,
+            redirect: redirectString,
+            to: toString,
+            value: valueString,
+            from: fromString
+        )
     }
-    if let from = from {
-        fromString = String(String(cString: from))
+}
+
+@_cdecl("authAsGuest")
+public func authAsGuest(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, credential: UnsafePointer<Int8>, authDate: UnsafePointer<Int8>, hash: UnsafePointer<Int8>, scope: UnsafePointer<Int8>) {
+    let stateString = getString(from: state)
+    let redirectString = getString(from: redirect)
+    let credentialString = getString(from: credential)
+    let authDateString = getString(from: authDate)
+    let hashString = getString(from: hash)
+    let scopeString = getString(from: scope)
+
+    executeOnMain { viewController, client in
+        await client.authAsGuest(
+            from: viewController,
+            state: stateString,
+            redirect: redirectString,
+            credential: credentialString,
+            authDate: authDateString,
+            hash: hashString,
+            scope: scopeString
+        )
     }
-    DispatchQueue.main.async {
-        guard let viewController = initViewController() else { return }
-        guard let client = ClientManager.shared.getClient() else { return }
-        // Reference to captured var in concurrently-executing code; this is an error in Swift 6
-        let capturedValueString = valueString
-        let capturedFromString = fromString
-        Task {
-            await client.callContract(from: viewController, state: stateString, redirect: redirectString, from: capturedFromString, contractAddress: contractAddressString, data: dataString, value: capturedValueString)
-        }
+}
+
+@_cdecl("registerGuestAccount")
+public func registerGuestAccount(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>) {
+    let stateString = getString(from: state)
+    let redirectString = getString(from: redirect)
+
+    executeOnMain { viewController, client in
+        await client.registerGuestAccount(
+            from: viewController,
+            state: stateString,
+            redirect: redirectString
+        )
     }
-    
 }

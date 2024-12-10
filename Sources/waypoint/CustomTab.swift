@@ -1,43 +1,91 @@
 import Foundation
 import AuthenticationServices
 
-struct CustomTabError: Error {
-    let message: String
-    let code: Int
+enum CustomTabError: Error {
+    case sessionStartFailed
+    case userRejected
+    case noUrlOrErrorReturned
+    case presentationError
+    case other(message: String, code: Int)
+
+    var message: String {
+        switch self {
+        case .sessionStartFailed:
+            return "Failed to start authentication session"
+        case .userRejected:
+            return "User rejected request"
+        case .noUrlOrErrorReturned:
+            return "No URL or error returned"
+        case .presentationError:
+            return "Failed to present authentication window"
+        case .other(let message, _):
+            return message
+        }
+    }
+
+    var code: Int {
+        switch self {
+        case .userRejected:
+            return -1
+        case .sessionStartFailed:
+            return -2
+        case .noUrlOrErrorReturned:
+            return -3
+        case .presentationError:
+            return -4
+        case .other(_, let code):
+            return code
+        }
+    }
 }
 
-class CustomTab: NSObject {
+final class CustomTab: NSObject {
     func startSession(url: URL, callbackURLScheme: String) async throws -> URL {
         return try await withCheckedThrowingContinuation { continuation in
-            var session: ASWebAuthenticationSession? = nil
-            session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { callbackURL, error in
-                if let error = error as NSError? {
-                    let authError = CustomTabError(message: error.localizedDescription, code: error.code)
-                    continuation.resume(throwing: authError)
-                } else if let callbackURL = callbackURL {
-                    continuation.resume(returning: callbackURL)
-                    // Cancel the session after receiving a successful callback
-                    session?.cancel()
-                } else {
-                    let authError = CustomTabError(message: "Unknown error", code: -1)
-                    continuation.resume(throwing: authError)
+            let session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { callbackURL, error in
+                if let error = error {
+                    if ((error as? ASWebAuthenticationSessionError)?.code) == ASWebAuthenticationSessionError.canceledLogin {
+                        continuation.resume(throwing: CustomTabError.userRejected)
+                        return
+                    }
+
+                    let nsError = error as NSError
+                    continuation.resume(throwing: CustomTabError.other(
+                        message: nsError.localizedDescription,
+                        code: nsError.code
+                    ))
+                    return
                 }
+
+                guard let callbackURL = callbackURL else {
+                    continuation.resume(throwing: CustomTabError.noUrlOrErrorReturned)
+                    return
+                }
+
+                continuation.resume(returning: callbackURL)
             }
-            session?.presentationContextProvider = self
-            // Indicates whether the session should ask the browser for a private authentication session
-            session?.prefersEphemeralWebBrowserSession = false
-            // Start the session
-            session?.start()
+
+            session.presentationContextProvider = self
+            session.prefersEphemeralWebBrowserSession = false
+
+            guard session.start() else {
+                continuation.resume(throwing: CustomTabError.sessionStartFailed)
+                return
+            }
         }
     }
 }
 
 extension CustomTab: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        var presentationAnchor: ASPresentationAnchor?
-        DispatchQueue.main.sync {
-            presentationAnchor = UIApplication.shared.windows.first { $0.isKeyWindow } ?? ASPresentationAnchor()
+        let window = DispatchQueue.main.sync {
+            UIApplication.shared.windows.first(where: { $0.isKeyWindow })
         }
-        return presentationAnchor!
+
+        guard let presentationAnchor = window else {
+            return ASPresentationAnchor()
+        }
+
+        return presentationAnchor
     }
 }
