@@ -8,16 +8,16 @@ public final class WaypointManager {
     public func configure(
         waypointOrigin: String,
         clientId: String,
-        rpcUrl: String,
-        chainId: Int
+        redirectUri: String,
+        isTestnet: Bool = false
     ) {
         guard waypointClient == nil else { return }
 
         waypointClient = Waypoint(
             waypointOrigin: waypointOrigin,
             clientId: clientId,
-            rpcUrl: rpcUrl,
-            chainId: chainId
+            redirectUri: redirectUri,
+            isTestnet: isTestnet
         )
     }
 

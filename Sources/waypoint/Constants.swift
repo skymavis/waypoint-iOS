@@ -5,7 +5,6 @@ struct ServicePaths {
     static let register = "register"
     static let send = "send"
     static let sign = "sign"
-    static let call = "call"
     static let guests = "guests"
     static let client = "client"
     static let wallet = "wallet"

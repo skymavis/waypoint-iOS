@@ -15,11 +15,7 @@ private func initViewController() -> UIViewController? {
     }
 }
 
-private func getString(from pointer: UnsafePointer<Int8>) -> String {
-    return String(cString: pointer)
-}
-
-private func getOptionalString(from pointer: UnsafePointer<Int8>?) -> String? {
+private func getOptionalString(cString pointer: UnsafePointer<Int8>?) -> String? {
     guard let pointer = pointer else { return nil }
     return String(cString: pointer)
 }
@@ -36,160 +32,136 @@ private func executeOnMain<T>(completion: @escaping (UIViewController, Waypoint)
 }
 
 @_cdecl("initClient")
-public func initClient(address: UnsafePointer<Int8>, clientId: UnsafePointer<Int8>, rpcUrl: UnsafePointer<Int8>, chainId: Int32) {
-    let addressString = getString(from: address)
-    let clientIdString = getString(from: clientId)
-    let rpcUrlString = getString(from: rpcUrl)
-    let chainIdInt = Int(chainId)
+public func initClient(waypointOrigin: UnsafePointer<Int8>, clientId: UnsafePointer<Int8>, redirectUri: UnsafePointer<Int8>, isTestnet: UnsafePointer<Bool>? = nil) {
+    let normalizedWaypointOrigin = String(cString: waypointOrigin)
+    let normalizedClientId = String(cString: clientId)
+    let normalizedRedirectUri = String(cString: redirectUri)
+    let normalizedIsTestnet = isTestnet?.pointee ?? false
 
     WaypointManager.shared.configure(
-        waypointOrigin: addressString,
-        clientId: clientIdString,
-        rpcUrl: rpcUrlString,
-        chainId: chainIdInt
+        waypointOrigin: normalizedWaypointOrigin,
+        clientId: normalizedClientId,
+        redirectUri: normalizedRedirectUri,
+        isTestnet: normalizedIsTestnet
     )
 }
 
 @_cdecl("authorize")
-public func authorize(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, scope: UnsafePointer<Int8>? = nil) {
-    let stateString = getString(from: state)
-    let redirectString = getString(from: redirect)
-    let scopeString = getOptionalString(from: scope)
+public func authorize(state: UnsafePointer<Int8>, scope: UnsafePointer<Int8>? = nil) {
+    let normalizedState = String(cString: state)
+    let normalizedScope = getOptionalString(cString: scope)
 
     executeOnMain { viewController, client in
         await client.authorize(
-            from: viewController,
-            state: stateString,
-            redirect: redirectString,
-            scope: scopeString
+            state: normalizedState,
+            scope: normalizedScope
         )
     }
 }
 
 @_cdecl("personalSign")
-public func personalSign(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, message: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
-    let stateString = getString(from: state)
-    let redirectString = getString(from: redirect)
-    let messageString = getString(from: message)
-    let fromString = getOptionalString(from: from)
+public func personalSign(state: UnsafePointer<Int8>, message: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
+    let normalizedState = String(cString: state)
+    let normalizedMessage = String(cString: message)
+    let normalizedFrom = getOptionalString(cString: from)
 
     executeOnMain { viewController, client in
         await client.personalSign(
-            from: viewController,
-            state: stateString,
-            redirect: redirectString,
-            message: messageString,
-            from: fromString
+            state: normalizedState,
+            message: normalizedMessage,
+            from: normalizedFrom
         )
     }
 }
 
 @_cdecl("signTypedData")
-public func signTypedData(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, typedData: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
-    let stateString = getString(from: state)
-    let redirectString = getString(from: redirect)
-    let typedDataString = getString(from: typedData)
-    let fromString = getOptionalString(from: from)
+public func signTypedData(state: UnsafePointer<Int8>, typedData: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
+    let normalizedState = String(cString: state)
+    let normalizedTypedData = String(cString: typedData)
+    let normalizedFrom = getOptionalString(cString: from)
 
     executeOnMain { viewController, client in
         await client.signTypedData(
-            from: viewController,
-            state: stateString,
-            redirect: redirectString,
-            typedData: typedDataString,
-            from: fromString
+            state: normalizedState,
+            typedData: normalizedTypedData,
+            from: normalizedFrom
         )
     }
 }
 
 @_cdecl("sendTransaction")
-public func sendTransaction(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, to: UnsafePointer<Int8>, data: UnsafePointer<Int8>? = nil, value: UnsafePointer<Int8>? = nil, from: UnsafePointer<Int8>? = nil) {
-    let stateString = getString(from: state)
-    let redirectString = getString(from: redirect)
-    let toString = getString(from: to)
-    let dataString = getOptionalString(from: data)
-    let valueString = getOptionalString(from: value)
-    let fromString = getOptionalString(from: from)
+public func sendTransaction(state: UnsafePointer<Int8>, to: UnsafePointer<Int8>, data: UnsafePointer<Int8>? = nil, value: UnsafePointer<Int8>? = nil, from: UnsafePointer<Int8>? = nil) {
+    let normalizedState = String(cString: state)
+    let normalizedTo = String(cString: to)
+    let normalizedData = getOptionalString(cString: data)
+    let normalizedValue = getOptionalString(cString: value)
+    let normalizedFrom = getOptionalString(cString: from)
 
     executeOnMain { viewController, client in
         await client.sendTransaction(
-            from: viewController,
-            state: stateString,
-            redirect: redirectString,
-            to: toString,
-            data: dataString,
-            value: valueString,
-            from: fromString
+            state: normalizedState,
+            to: normalizedTo,
+            data: normalizedData,
+            value: normalizedValue,
+            from: normalizedFrom
         )
     }
 }
 
 @_cdecl("sendNativeToken")
-public func sendNativeToken(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, to: UnsafePointer<Int8>, value: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
-    let stateString = getString(from: state)
-    let redirectString = getString(from: redirect)
-    let toString = getString(from: to)
-    let valueString = getString(from: value)
-    let fromString = getOptionalString(from: from)
+public func sendNativeToken(state: UnsafePointer<Int8>, to: UnsafePointer<Int8>, value: UnsafePointer<Int8>, from: UnsafePointer<Int8>? = nil) {
+    let normalizedState = String(cString: state)
+    let normalizedTo = String(cString: to)
+    let normalizedValue = String(cString: value)
+    let normalizedFrom = getOptionalString(cString: from)
 
     executeOnMain { viewController, client in
         await client.sendNativeToken(
-            from: viewController,
-            state: stateString,
-            redirect: redirectString,
-            to: toString,
-            value: valueString,
-            from: fromString
+            state: normalizedState,
+            to: normalizedTo,
+            value: normalizedValue,
+            from: normalizedFrom
         )
     }
 }
 
 @_cdecl("authAsGuest")
-public func authAsGuest(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>, credential: UnsafePointer<Int8>, authDate: UnsafePointer<Int8>, hash: UnsafePointer<Int8>, scope: UnsafePointer<Int8>) {
-    let stateString = getString(from: state)
-    let redirectString = getString(from: redirect)
-    let credentialString = getString(from: credential)
-    let authDateString = getString(from: authDate)
-    let hashString = getString(from: hash)
-    let scopeString = getString(from: scope)
+public func authAsGuest(state: UnsafePointer<Int8>, credential: UnsafePointer<Int8>, authDate: UnsafePointer<Int8>, hash: UnsafePointer<Int8>, scope: UnsafePointer<Int8>) {
+    let normalizedState = String(cString: state)
+    let normalizedCredential = String(cString: credential)
+    let normalizedAuthDate = String(cString: authDate)
+    let normalizedHash = String(cString: hash)
+    let normalizedScope = String(cString: scope)
 
     executeOnMain { viewController, client in
         await client.authAsGuest(
-            from: viewController,
-            state: stateString,
-            redirect: redirectString,
-            credential: credentialString,
-            authDate: authDateString,
-            hash: hashString,
-            scope: scopeString
+            state: normalizedState,
+            credential: normalizedCredential,
+            authDate: normalizedAuthDate,
+            hash: normalizedHash,
+            scope: normalizedScope
         )
     }
 }
 
 @_cdecl("registerGuestAccount")
-public func registerGuestAccount(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>) {
-    let stateString = getString(from: state)
-    let redirectString = getString(from: redirect)
+public func registerGuestAccount(state: UnsafePointer<Int8>) {
+    let normalizedState = String(cString: state)
 
     executeOnMain { viewController, client in
         await client.registerGuestAccount(
-            from: viewController,
-            state: stateString,
-            redirect: redirectString
+            state: normalizedState
         )
     }
 }
 
 @_cdecl("createKeylessWallet")
-public func createKeylessWallet(state: UnsafePointer<Int8>, redirect: UnsafePointer<Int8>) {
-    let stateString = getString(from: state)
-    let redirectString = getString(from: redirect)
+public func createKeylessWallet(state: UnsafePointer<Int8>) {
+    let normalizedState = String(cString: state)
 
     executeOnMain { viewController, client in
         await client.createKeylessWallet(
-            from: viewController,
-            state: stateString,
-            redirect: redirectString
+            state: normalizedState
         )
     }
 }
