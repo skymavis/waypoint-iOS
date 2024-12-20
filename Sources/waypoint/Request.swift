@@ -20,6 +20,7 @@ class Request {
 
     private func handleCustomTabError(error: CustomTabError, callbackScheme: String) -> String {
         guard let errorCallbackUrl = constructURLWithParams(for: callbackScheme, with: [
+            "state": params["state"] ?? "",
             "type": "fail",
             "message": error.message,
             "code": String(error.code)
