@@ -1,32 +1,17 @@
 import Foundation
 import UIKit
 
-private func initViewController() -> UIViewController? {
-    if #available(iOS 13.0, *) {
-        guard let windowScene = UIApplication.shared.connectedScenes
-            .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene,
-              let viewController = windowScene.windows
-            .first(where: { $0.isKeyWindow })?.rootViewController else {
-            return nil
-        }
-        return viewController
-    } else {
-        return UIApplication.shared.keyWindow?.rootViewController
-    }
-}
-
 private func getOptionalString(cString pointer: UnsafePointer<Int8>?) -> String? {
     guard let pointer = pointer else { return nil }
     return String(cString: pointer)
 }
 
-private func executeOnMain<T>(completion: @escaping (UIViewController, Waypoint) async -> T) {
+private func executeOnMain<T>(completion: @escaping (Waypoint) async -> T) {
     DispatchQueue.main.async {
-        guard let viewController = initViewController(),
-              let client = WaypointManager.shared.client else { return }
-
+        guard let client = WaypointManager.shared.client else { return }
+        
         Task {
-            await completion(viewController, client)
+            await completion(client)
         }
     }
 }
@@ -37,7 +22,7 @@ public func initClient(waypointOrigin: UnsafePointer<Int8>, clientId: UnsafePoin
     let normalizedClientId = String(cString: clientId)
     let normalizedRedirectUri = String(cString: redirectUri)
     let normalizedIsTestnet = isTestnet?.pointee ?? false
-
+    
     WaypointManager.shared.configure(
         waypointOrigin: normalizedWaypointOrigin,
         clientId: normalizedClientId,
@@ -50,8 +35,8 @@ public func initClient(waypointOrigin: UnsafePointer<Int8>, clientId: UnsafePoin
 public func authorize(state: UnsafePointer<Int8>, scope: UnsafePointer<Int8>? = nil) {
     let normalizedState = String(cString: state)
     let normalizedScope = getOptionalString(cString: scope)
-
-    executeOnMain { viewController, client in
+    
+    executeOnMain { client in
         await client.authorize(
             state: normalizedState,
             scope: normalizedScope
@@ -64,8 +49,8 @@ public func personalSign(state: UnsafePointer<Int8>, message: UnsafePointer<Int8
     let normalizedState = String(cString: state)
     let normalizedMessage = String(cString: message)
     let normalizedFrom = getOptionalString(cString: from)
-
-    executeOnMain { viewController, client in
+    
+    executeOnMain { client in
         await client.personalSign(
             state: normalizedState,
             message: normalizedMessage,
@@ -79,8 +64,8 @@ public func signTypedData(state: UnsafePointer<Int8>, typedData: UnsafePointer<I
     let normalizedState = String(cString: state)
     let normalizedTypedData = String(cString: typedData)
     let normalizedFrom = getOptionalString(cString: from)
-
-    executeOnMain { viewController, client in
+    
+    executeOnMain { client in
         await client.signTypedData(
             state: normalizedState,
             typedData: normalizedTypedData,
@@ -96,8 +81,8 @@ public func sendTransaction(state: UnsafePointer<Int8>, to: UnsafePointer<Int8>,
     let normalizedData = getOptionalString(cString: data)
     let normalizedValue = getOptionalString(cString: value)
     let normalizedFrom = getOptionalString(cString: from)
-
-    executeOnMain { viewController, client in
+    
+    executeOnMain { client in
         await client.sendTransaction(
             state: normalizedState,
             to: normalizedTo,
@@ -114,8 +99,8 @@ public func sendNativeToken(state: UnsafePointer<Int8>, to: UnsafePointer<Int8>,
     let normalizedTo = String(cString: to)
     let normalizedValue = String(cString: value)
     let normalizedFrom = getOptionalString(cString: from)
-
-    executeOnMain { viewController, client in
+    
+    executeOnMain { client in
         await client.sendNativeToken(
             state: normalizedState,
             to: normalizedTo,
@@ -132,8 +117,8 @@ public func authAsGuest(state: UnsafePointer<Int8>, credential: UnsafePointer<In
     let normalizedAuthDate = String(cString: authDate)
     let normalizedHash = String(cString: hash)
     let normalizedScope = String(cString: scope)
-
-    executeOnMain { viewController, client in
+    
+    executeOnMain { client in
         await client.authAsGuest(
             state: normalizedState,
             credential: normalizedCredential,
@@ -147,8 +132,8 @@ public func authAsGuest(state: UnsafePointer<Int8>, credential: UnsafePointer<In
 @_cdecl("registerGuestAccount")
 public func registerGuestAccount(state: UnsafePointer<Int8>) {
     let normalizedState = String(cString: state)
-
-    executeOnMain { viewController, client in
+    
+    executeOnMain { client in
         await client.registerGuestAccount(
             state: normalizedState
         )
@@ -158,8 +143,8 @@ public func registerGuestAccount(state: UnsafePointer<Int8>) {
 @_cdecl("createKeylessWallet")
 public func createKeylessWallet(state: UnsafePointer<Int8>) {
     let normalizedState = String(cString: state)
-
-    executeOnMain { viewController, client in
+    
+    executeOnMain { client in
         await client.createKeylessWallet(
             state: normalizedState
         )

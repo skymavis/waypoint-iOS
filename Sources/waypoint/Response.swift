@@ -7,15 +7,18 @@ public struct ResponseError: Error {
 
 public struct Response {
     public let success: Bool
+    public let state: String?
     public let error: ResponseError?
     public let data: [String: String]
 
     public init(
         success: Bool = false,
+        state: String? = nil,
         error: ResponseError? = nil,
         data: [String: String] = [:]
     ) {
         self.success = success
+        self.state = state
         self.error = error
         self.data = data
     }
@@ -37,6 +40,7 @@ public struct Response {
             item.value.map { (item.name, $0) }
         })
 
+        let state = queryParams["state"]
         let isSuccess = queryParams["type"] == "success"
 
         if !isSuccess {
@@ -46,12 +50,14 @@ public struct Response {
             )
             return Response(
                 success: false,
+                state: state,
                 error: error
             )
         }
 
         return Response(
             success: true,
+            state: state,
             data: queryParams
         )
     }
