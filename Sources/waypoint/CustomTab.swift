@@ -6,7 +6,7 @@ enum CustomTabError: Error {
     case userRejected
     case noUrlReturned
     case other(message: String, code: Int)
-    
+
     var message: String {
         switch self {
         case .sessionStartFailed: return "Failed to start session"
@@ -15,7 +15,7 @@ enum CustomTabError: Error {
         case .other(let message, _): return message
         }
     }
-    
+
     var code: Int {
         switch self {
         case .userRejected: return 1000
@@ -28,12 +28,12 @@ enum CustomTabError: Error {
 
 final class CustomTab: NSObject {
     private var session: ASWebAuthenticationSession?
-    
+
     func startSession(url: URL, callbackURLScheme: String) async throws -> URL {
         return try await withCheckedThrowingContinuation { continuation in
             session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { callbackURL, error in
                 self.session = nil
-                
+
                 if let error = error {
                     if (error as? ASWebAuthenticationSessionError)?.code == .canceledLogin {
                         continuation.resume(throwing: CustomTabError.userRejected)
@@ -46,18 +46,18 @@ final class CustomTab: NSObject {
                     }
                     return
                 }
-                
+
                 guard let callbackURL = callbackURL else {
                     continuation.resume(throwing: CustomTabError.noUrlReturned)
                     return
                 }
-                
+
                 continuation.resume(returning: callbackURL)
             }
-            
+
             session?.presentationContextProvider = self
             session?.prefersEphemeralWebBrowserSession = false
-            
+
             if !(session?.start() ?? false) {
                 continuation.resume(throwing: CustomTabError.sessionStartFailed)
             }

@@ -9,7 +9,7 @@ private func getOptionalString(cString pointer: UnsafePointer<Int8>?) -> String?
 private func executeOnMain<T>(completion: @escaping (Waypoint) async -> T) {
     DispatchQueue.main.async {
         guard let client = WaypointManager.shared.client else { return }
-        
+
         Task {
             await completion(client)
         }
@@ -17,17 +17,19 @@ private func executeOnMain<T>(completion: @escaping (Waypoint) async -> T) {
 }
 
 @_cdecl("initClient")
-public func initClient(waypointOrigin: UnsafePointer<Int8>, clientId: UnsafePointer<Int8>, redirectUri: UnsafePointer<Int8>, isTestnet: UnsafePointer<Bool>? = nil) {
+public func initClient(waypointOrigin: UnsafePointer<Int8>, clientId: UnsafePointer<Int8>, redirectUri: UnsafePointer<Int8>, rpcUrl: UnsafePointer<Int8>, chainId: Int32) {
     let normalizedWaypointOrigin = String(cString: waypointOrigin)
     let normalizedClientId = String(cString: clientId)
     let normalizedRedirectUri = String(cString: redirectUri)
-    let normalizedIsTestnet = isTestnet?.pointee ?? false
-    
+    let normalizedRpcUrl = String(cString: rpcUrl)
+    let normalizedChainId = Int(chainId)
+
     WaypointManager.shared.configure(
         waypointOrigin: normalizedWaypointOrigin,
         clientId: normalizedClientId,
         redirectUri: normalizedRedirectUri,
-        isTestnet: normalizedIsTestnet
+        rpcUrl: normalizedRpcUrl,
+        chainId: normalizedChainId
     )
 }
 
@@ -35,7 +37,7 @@ public func initClient(waypointOrigin: UnsafePointer<Int8>, clientId: UnsafePoin
 public func authorize(state: UnsafePointer<Int8>, scope: UnsafePointer<Int8>? = nil) {
     let normalizedState = String(cString: state)
     let normalizedScope = getOptionalString(cString: scope)
-    
+
     executeOnMain { client in
         await client.authorize(
             state: normalizedState,
@@ -49,7 +51,7 @@ public func personalSign(state: UnsafePointer<Int8>, message: UnsafePointer<Int8
     let normalizedState = String(cString: state)
     let normalizedMessage = String(cString: message)
     let normalizedFrom = getOptionalString(cString: from)
-    
+
     executeOnMain { client in
         await client.personalSign(
             state: normalizedState,
@@ -64,7 +66,7 @@ public func signTypedData(state: UnsafePointer<Int8>, typedData: UnsafePointer<I
     let normalizedState = String(cString: state)
     let normalizedTypedData = String(cString: typedData)
     let normalizedFrom = getOptionalString(cString: from)
-    
+
     executeOnMain { client in
         await client.signTypedData(
             state: normalizedState,
@@ -81,7 +83,7 @@ public func sendTransaction(state: UnsafePointer<Int8>, to: UnsafePointer<Int8>,
     let normalizedData = getOptionalString(cString: data)
     let normalizedValue = getOptionalString(cString: value)
     let normalizedFrom = getOptionalString(cString: from)
-    
+
     executeOnMain { client in
         await client.sendTransaction(
             state: normalizedState,
@@ -99,7 +101,7 @@ public func sendNativeToken(state: UnsafePointer<Int8>, to: UnsafePointer<Int8>,
     let normalizedTo = String(cString: to)
     let normalizedValue = String(cString: value)
     let normalizedFrom = getOptionalString(cString: from)
-    
+
     executeOnMain { client in
         await client.sendNativeToken(
             state: normalizedState,
@@ -117,7 +119,7 @@ public func authAsGuest(state: UnsafePointer<Int8>, credential: UnsafePointer<In
     let normalizedAuthDate = String(cString: authDate)
     let normalizedHash = String(cString: hash)
     let normalizedScope = String(cString: scope)
-    
+
     executeOnMain { client in
         await client.authAsGuest(
             state: normalizedState,
@@ -132,7 +134,7 @@ public func authAsGuest(state: UnsafePointer<Int8>, credential: UnsafePointer<In
 @_cdecl("registerGuestAccount")
 public func registerGuestAccount(state: UnsafePointer<Int8>) {
     let normalizedState = String(cString: state)
-    
+
     executeOnMain { client in
         await client.registerGuestAccount(
             state: normalizedState
@@ -143,7 +145,7 @@ public func registerGuestAccount(state: UnsafePointer<Int8>) {
 @_cdecl("createKeylessWallet")
 public func createKeylessWallet(state: UnsafePointer<Int8>) {
     let normalizedState = String(cString: state)
-    
+
     executeOnMain { client in
         await client.createKeylessWallet(
             state: normalizedState

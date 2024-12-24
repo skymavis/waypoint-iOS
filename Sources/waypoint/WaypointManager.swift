@@ -9,7 +9,8 @@ public final class WaypointManager {
         waypointOrigin: String,
         clientId: String,
         redirectUri: String,
-        isTestnet: Bool = false
+        rpcUrl: String,
+        chainId: Int
     ) {
         guard waypointClient == nil else { return }
 
@@ -17,7 +18,8 @@ public final class WaypointManager {
             waypointOrigin: waypointOrigin,
             clientId: clientId,
             redirectUri: redirectUri,
-            isTestnet: isTestnet
+            rpcUrl: rpcUrl,
+            chainId: chainId
         )
     }
 

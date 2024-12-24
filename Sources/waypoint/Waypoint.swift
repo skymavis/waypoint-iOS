@@ -23,14 +23,28 @@ public class Waypoint {
     private let rpcUrl: String
     private let chainId: Int
 
-    public init(waypointOrigin: String, clientId: String, redirectUri: String, isTestnet: Bool = false) {
+    public init(waypointOrigin: String,
+                clientId: String,
+                redirectUri: String,
+                rpcUrl: String,
+                chainId: Int
+    ) {
         self.waypointOrigin = waypointOrigin
         self.clientId = clientId
         self.redirectUri = redirectUri
+        self.rpcUrl = rpcUrl
+        self.chainId = chainId
+    }
 
-        let network = isTestnet ? Network.Testnet : Network.Mainnet
-        self.chainId = network.chainId
-        self.rpcUrl = network.rpcUrl
+    public init(waypointOrigin: String,
+                clientId: String,
+                redirectUri: String
+    ) {
+        self.waypointOrigin = waypointOrigin
+        self.clientId = clientId
+        self.redirectUri = redirectUri
+        self.rpcUrl = Network.Mainnet.rpcUrl
+        self.chainId = Network.Mainnet.chainId
     }
 
     private func constructWaypointEndpoint(for method: String) -> String {
