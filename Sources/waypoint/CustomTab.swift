@@ -1,43 +1,87 @@
 import Foundation
 import AuthenticationServices
 
-struct CustomTabError: Error {
-    let message: String
-    let code: Int
+enum CustomTabError: Error {
+    case sessionStartFailed
+    case userRejected
+    case noUrlReturned
+    case other(message: String, code: Int)
+
+    var message: String {
+        switch self {
+        case .sessionStartFailed: return "Failed to start session"
+        case .userRejected: return "User rejected"
+        case .noUrlReturned: return "No URL returned"
+        case .other(let message, _): return message
+        }
+    }
+
+    var code: Int {
+        switch self {
+        case .userRejected: return 1000
+        case .sessionStartFailed: return 1001
+        case .noUrlReturned: return 1002
+        case .other(_, let code): return code
+        }
+    }
 }
 
-class CustomTab: NSObject {
+final class CustomTab: NSObject {
+    private var session: ASWebAuthenticationSession?
+
     func startSession(url: URL, callbackURLScheme: String) async throws -> URL {
         return try await withCheckedThrowingContinuation { continuation in
-            var session: ASWebAuthenticationSession? = nil
             session = ASWebAuthenticationSession(url: url, callbackURLScheme: callbackURLScheme) { callbackURL, error in
-                if let error = error as NSError? {
-                    let authError = CustomTabError(message: error.localizedDescription, code: error.code)
-                    continuation.resume(throwing: authError)
-                } else if let callbackURL = callbackURL {
-                    continuation.resume(returning: callbackURL)
-                    // Cancel the session after receiving a successful callback
-                    session?.cancel()
-                } else {
-                    let authError = CustomTabError(message: "Unknown error", code: -1)
-                    continuation.resume(throwing: authError)
+                self.session = nil
+
+                if let error = error {
+                    if (error as? ASWebAuthenticationSessionError)?.code == .canceledLogin {
+                        continuation.resume(throwing: CustomTabError.userRejected)
+                    } else {
+                        let nsError = error as NSError
+                        continuation.resume(throwing: CustomTabError.other(
+                            message: nsError.localizedDescription,
+                            code: nsError.code
+                        ))
+                    }
+                    return
                 }
+
+                guard let callbackURL = callbackURL else {
+                    continuation.resume(throwing: CustomTabError.noUrlReturned)
+                    return
+                }
+
+                continuation.resume(returning: callbackURL)
             }
+
             session?.presentationContextProvider = self
-            // Indicates whether the session should ask the browser for a private authentication session
             session?.prefersEphemeralWebBrowserSession = false
-            // Start the session
-            session?.start()
+
+            if !(session?.start() ?? false) {
+                continuation.resume(throwing: CustomTabError.sessionStartFailed)
+            }
         }
+    }
+}
+
+func getKeyWindow() -> UIWindow? {
+    return Thread.isMainThread ? fetchKeyWindow() : DispatchQueue.main.sync { fetchKeyWindow() }
+}
+
+private func fetchKeyWindow() -> UIWindow? {
+    if #available(iOS 13.0, *) {
+        return UIApplication.shared.connectedScenes
+            .compactMap { $0 as? UIWindowScene }
+            .flatMap(\.windows)
+            .first { $0.isKeyWindow }
+    } else {
+        return UIApplication.shared.keyWindow
     }
 }
 
 extension CustomTab: ASWebAuthenticationPresentationContextProviding {
     func presentationAnchor(for session: ASWebAuthenticationSession) -> ASPresentationAnchor {
-        var presentationAnchor: ASPresentationAnchor?
-        DispatchQueue.main.sync {
-            presentationAnchor = UIApplication.shared.windows.first { $0.isKeyWindow } ?? ASPresentationAnchor()
-        }
-        return presentationAnchor!
+        getKeyWindow() ?? ASPresentationAnchor()
     }
 }

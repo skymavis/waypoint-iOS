@@ -1,57 +1,68 @@
 import Foundation
 
-public class Response {
-    private var success: Bool?
-    private var method: String?
-    private var data: String?
-    private var address: String?
-    private var state: String?
-    
-    init(success: Bool? = nil, method: String? = nil, data: String? = nil, address: String? = nil, state: String? = nil) {
+public struct ResponseError: Error {
+    let message: String
+    let code: Int
+}
+
+public struct Response {
+    public let success: Bool
+    public let state: String?
+    public let error: ResponseError?
+    public let data: [String: String]
+
+    public init(
+        success: Bool = false,
+        state: String? = nil,
+        error: ResponseError? = nil,
+        data: [String: String] = [:]
+    ) {
         self.success = success
-        self.method = method
-        self.data = data
-        self.address = address
         self.state = state
-    }
-    
-    public func getSuccess() -> Bool? {
-        return success
-    }
-    
-    public func setSuccess(_ success: Bool?) {
-        self.success = success
-    }
-    
-    public func getMethod() -> String? {
-        return method
-    }
-    
-    public func setMethod(_ method: String?) {
-        self.method = method
-    }
-    
-    public func getData() -> String? {
-        return data
-    }
-    
-    public func setData(_ data: String?) {
+        self.error = error
         self.data = data
     }
-    
-    public func getAddress() -> String? {
-        return address
+
+    public static func parseDeepLink(deeplink: String) -> Response {
+        guard let url = URL(string: deeplink) else {
+            return Response()
+        }
+        return parseDeepLink(deeplink: url)
     }
-    
-    public func setAddress(_ address: String?) {
-        self.address = address
+
+    public static func parseDeepLink(deeplink: URL) -> Response {
+        guard let components = URLComponents(url: deeplink, resolvingAgainstBaseURL: true),
+              let queryItems = components.queryItems else {
+            return Response()
+        }
+
+        let queryParams = Dictionary(uniqueKeysWithValues: queryItems.compactMap { item in
+            item.value.map { (item.name, $0) }
+        })
+
+        let state = queryParams["state"]
+        let isSuccess = queryParams["type"] == "success"
+
+        if !isSuccess {
+            let error = ResponseError(
+                message: queryParams["message"] ?? "Unknown error",
+                code: Int(queryParams["code"] ?? "0") ?? 0
+            )
+            return Response(
+                success: false,
+                state: state,
+                error: error
+            )
+        }
+
+        return Response(
+            success: true,
+            state: state,
+            data: queryParams
+        )
     }
-    
-    public func getState() -> String? {
-        return state
-    }
-    
-    public func setState(_ state: String?) {
-        self.state = state
+
+    public func getValue(for key: String) -> String? {
+        return data[key]
     }
 }

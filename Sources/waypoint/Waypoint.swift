@@ -1,137 +1,188 @@
 import Foundation
 import SafariServices
 
+public struct Network {
+    public static let Mainnet = Network(
+        chainId: 2020,
+        rpcUrl: "https://api.roninchain.com/rpc"
+    )
+
+    public static let Testnet = Network(
+        chainId: 2021,
+        rpcUrl: "https://saigon-testnet.roninchain.com/rpc"
+    )
+
+    public let chainId: Int
+    public let rpcUrl: String
+}
+
 public class Waypoint {
-    var waypointOrigin : String
-    var clientId : String
-    var chainRpc : String
-    var chainId : Int
-    
-    public init(waypointOrigin: String, clientId: String, chainRpc: String, chainId: Int) {
+    private let waypointOrigin: String
+    private let clientId: String
+    private let redirectUri: String
+    private let rpcUrl: String
+    private let chainId: Int
+
+    public init(waypointOrigin: String,
+                clientId: String,
+                redirectUri: String,
+                rpcUrl: String,
+                chainId: Int
+    ) {
         self.waypointOrigin = waypointOrigin
         self.clientId = clientId
-        self.chainRpc = chainRpc
+        self.redirectUri = redirectUri
+        self.rpcUrl = rpcUrl
         self.chainId = chainId
     }
-    
-    
-    private func request(from viewController: UIViewController, redirect : String, request: Request) async -> String {
-        var urlString = waypointOrigin
-        
-        switch request.method {
-        case "authorize":
-            urlString += "/client/\(clientId)/authorize"
-        case "send":
-            urlString += "/wallet/send"
-        case "sign":
-            urlString += "/wallet/sign"
-        case "call":
-            urlString += "/wallet/call"
+
+    public init(waypointOrigin: String,
+                clientId: String,
+                redirectUri: String
+    ) {
+        self.waypointOrigin = waypointOrigin
+        self.clientId = clientId
+        self.redirectUri = redirectUri
+        self.rpcUrl = Network.Mainnet.rpcUrl
+        self.chainId = Network.Mainnet.chainId
+    }
+
+    private func constructWaypointEndpoint(for method: String) -> String {
+        let path: String
+        switch method {
+        case ServicePaths.authorize:
+            path = "/\(ServicePaths.client)/\(clientId)/\(ServicePaths.authorize)"
+        case ServicePaths.send, ServicePaths.sign:
+            path = "/\(ServicePaths.wallet)/\(method)"
+        case ServicePaths.guests:
+            path = "/\(ServicePaths.seamless)/\(ServicePaths.guests)/\(ServicePaths.start)"
+        case ServicePaths.register:
+            path = "/\(ServicePaths.guests)/\(ServicePaths.register)"
+        case ServicePaths.setup:
+            path = "/\(ServicePaths.wallet)/\(ServicePaths.setup)/\(ServicePaths.introduce)"
         default:
-            break
+            path = ""
         }
-        
-        // Append parameters as query string
-        var components = URLComponents(string: urlString)!
-        components.queryItems = request.params.map { URLQueryItem(name: $0.key, value: $0.value) }
-        
-        guard let url = components.url else {
-            return ""
-        }
-        
-        let webSession = CustomTab()
-        
-        let callbackScheme = Utils.getDeepLinkScheme(deepLink: redirect)
-        
-        var result : String = ""
-        
-        do {
-            let callbackURL = try await webSession.startSession(url: url, callbackURLScheme: callbackScheme)
-            DispatchQueue.main.async {
-                if(UIApplication.shared.canOpenURL(callbackURL)) {
-                    UIApplication.shared.open(callbackURL)
-                }
-            }
-            result = callbackURL.absoluteString
-            
-        } catch let error as CustomTabError {
-            DispatchQueue.main.async {
-                print("Authentication failed with error: \(error.message), code: \(error.code)")
-            }
-        } catch {
-            DispatchQueue.main.async {
-                print("Authentication failed with an unknown error")
-            }
-            
-        }
-        return result
+        return waypointOrigin + path
     }
-    
-    public func authorize(from viewController: UIViewController, state : String, redirect: String) async -> String {
-        let params = ["state": state, "redirect": redirect]
-        let req = Request(method: "authorize", params: params)
-        return await self.request(from: viewController, redirect: redirect,  request: req)
+
+    private func constructWaypointParams(_ params: [String: String?]) -> [String: String?] {
+        return [
+            RequestParams.clientId: clientId,
+            RequestParams.redirect: redirectUri,
+            RequestParams.chainId: String(chainId),
+        ].merging(params, uniquingKeysWith: { (_, new) in new })
     }
-    
-    public func sendTransaction(from viewController: UIViewController,state : String, redirect: String, from: String? = nil, to: String, value: String) async -> String {
-        var params = [
-            "clientId": self.clientId,
-            "state": state,
-            "redirect": redirect,
-            "chainId": String(self.chainId),
-            "value": value,
-            "to": to
-        ]
-        // Use for multiple wallet
-        if (from != nil) {
-            params["expectAddress"] = from
-        }
-        let request = Request(method: "send", params: params)
-        return await self.request(from: viewController, redirect: redirect, request: request)
+
+    public func authorize(state: String, scope: String? = nil) async -> String {
+        let endpoint = constructWaypointEndpoint(for: ServicePaths.authorize)
+        let request = Request(
+            endpoint: endpoint,
+            redirectUri: redirectUri,
+            params: constructWaypointParams([
+                RequestParams.state: state,
+                RequestParams.scope: scope
+            ])
+        )
+        return await request.execute()
     }
-    
-    public func callContract(from viewController: UIViewController, state : String, redirect: String, from : String? = nil, contractAddress: String, data: String, value : String? = nil) async -> String  {
-        var params = [
-            "state": state,
-            "redirect": redirect,
-            "clientId": self.clientId,
-            "chainId": String(self.chainId),
-            "to": contractAddress,
-            "data": data
-        ]
-        // If interact with the contract require value
-        if(value != nil) {
-            params["value"] = value
-        }
-        // Use for multiple wallet
-        if(from != nil) {
-            params["expectAddress"] = from
-        }
-        
-        let request = Request(method: "send", params: params)
-        return await self.request(from: viewController, redirect: redirect, request: request)
+
+    public func personalSign(state: String, message: String, from: String? = nil) async -> String {
+        let endpoint = constructWaypointEndpoint(for: ServicePaths.sign)
+        let request = Request(
+            endpoint: endpoint,
+            redirectUri: redirectUri,
+            params: constructWaypointParams([
+                RequestParams.state: state,
+                RequestParams.message: message,
+                RequestParams.expectAddress: from
+            ])
+        )
+        return await request.execute()
     }
-    
-    public func personalSign(from viewController: UIViewController, state : String, redirect: String, from: String? = nil, message: String) async -> String {
-        var params = ["state": state, "clientId": self.clientId, "message": message, "redirect": redirect]
-        // Use for multiple wallet
-        
-        if(from != nil) {
-            params["expectAddress"] = from
-        }
-        
-        let request = Request(method: "sign", params: params)
-        return await self.request(from: viewController, redirect: redirect, request: request)
-        
+
+    public func signTypedData(state: String, typedData: String, from: String? = nil) async -> String {
+        let endpoint = constructWaypointEndpoint(for: ServicePaths.sign)
+        let request = Request(
+            endpoint: endpoint,
+            redirectUri: redirectUri,
+            params: constructWaypointParams([
+                RequestParams.state: state,
+                RequestParams.typedData: typedData,
+                RequestParams.expectAddress: from
+            ])
+        )
+        return await request.execute()
     }
-    
-    public func signTypedData(from viewController: UIViewController, state : String, redirect: String, from: String? = nil, typedData: String) async -> String {
-        var params = ["state": state, "clientId": self.clientId, "redirect": redirect, "typedData": typedData]
-        // Use for multiple wallet
-        if(from != nil) {
-            params["expectAddress"] = from
-        }
-        let request = Request(method: "sign", params: params)
-        return await self.request(from: viewController, redirect: redirect, request: request)
+
+    public func sendTransaction(state: String, to: String, data: String? = nil, value: String? = nil, from: String? = nil) async -> String {
+        let endpoint = constructWaypointEndpoint(for: ServicePaths.send)
+        let request = Request(
+            endpoint: endpoint,
+            redirectUri: redirectUri,
+            params: constructWaypointParams([
+                RequestParams.state: state,
+                RequestParams.to: to,
+                RequestParams.data: data,
+                RequestParams.value: value,
+                RequestParams.expectAddress: from
+            ])
+        )
+        return await request.execute()
+    }
+
+    public func sendNativeToken(state: String, to: String, value: String, from: String? = nil) async -> String {
+        let endpoint = constructWaypointEndpoint(for: ServicePaths.send)
+        let request = Request(
+            endpoint: endpoint,
+            redirectUri: redirectUri,
+            params: constructWaypointParams([
+                RequestParams.state: state,
+                RequestParams.to: to,
+                RequestParams.value: value,
+                RequestParams.expectAddress: from
+            ])
+        )
+        return await request.execute()
+    }
+
+    public func authAsGuest(state: String, credential: String, authDate: String, hash: String, scope: String) async -> String {
+        let endpoint = constructWaypointEndpoint(for: ServicePaths.guests)
+        let request = Request(
+            endpoint: endpoint,
+            redirectUri: redirectUri,
+            params: constructWaypointParams([
+                RequestParams.state: state,
+                RequestParams.credential: credential,
+                RequestParams.authDate: authDate,
+                RequestParams.hash: hash,
+                RequestParams.scope: scope
+            ])
+        )
+        return await request.execute()
+    }
+
+    public func registerGuestAccount(state: String) async -> String {
+        let endpoint = constructWaypointEndpoint(for: ServicePaths.register)
+        let request = Request(
+            endpoint: endpoint,
+            redirectUri: redirectUri,
+            params: constructWaypointParams([
+                RequestParams.state: state
+            ])
+        )
+        return await request.execute()
+    }
+
+    public func createKeylessWallet(state: String) async -> String {
+        let endpoint = constructWaypointEndpoint(for: ServicePaths.setup)
+        let request = Request(
+            endpoint: endpoint,
+            redirectUri: redirectUri,
+            params: constructWaypointParams([
+                RequestParams.state: state
+            ])
+        )
+        return await request.execute()
     }
 }
